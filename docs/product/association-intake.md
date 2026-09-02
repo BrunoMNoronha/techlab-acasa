@@ -4,6 +4,8 @@
 
 **Inscrição pública aprovada para o MVP.** O fluxo detalhado e as regras de negócio permanecem em refinamento.
 
+O Estatuto ACASA 2025 confirma que a Diretoria possui competência para admitir/demitir sócios. A implementação deve respeitar essa governança, ainda que a operação diária seja executada por perfis administrativos autorizados.
+
 ## Objetivo
 
 Permitir que uma pessoa solicite associação à ACASA por meio do sistema e que a administração analise a solicitação antes da criação/ativação do vínculo associativo.
@@ -16,7 +18,8 @@ Permitir que uma pessoa solicite associação à ACASA por meio do sistema e que
 - dados pessoais só devem ser coletados quando houver finalidade e necessidade justificadas;
 - uploads devem ser privados e validados;
 - ações administrativas relevantes devem ser auditáveis;
-- uma solicitação aprovada deve reaproveitar dados válidos e evitar duplicidade desnecessária.
+- uma solicitação aprovada deve reaproveitar dados válidos e evitar duplicidade desnecessária;
+- categoria do associado deve usar uma das categorias estatutárias documentadas em `membership-model.md`.
 
 ## Evidência do processo atual
 
@@ -56,17 +59,28 @@ Antes da implementação, cada campo deve ser classificado como:
 
 Para dados de maior impacto de privacidade — especialmente CPF, RG, filiação, foto, data de nascimento e contato de emergência — deve existir finalidade registrada antes de torná-los obrigatórios.
 
+## Categorias disponíveis após admissão
+
+Conforme o Art. 12 do Estatuto 2025:
+
+- Fundadores;
+- Beneméritos;
+- Contribuintes.
+
+A categoria não deve ser inferida pelo formulário sem regra aprovada. O momento e o responsável pelo enquadramento ainda precisam ser definidos.
+
 ## Fluxo mínimo já aprovado
 
 1. candidato acessa o formulário público;
 2. envia a solicitação com os dados aprovados;
 3. sistema registra a solicitação separadamente do cadastro de associado;
-4. administração consulta e analisa a solicitação conforme permissões;
+4. administração consulta e analisa a solicitação conforme permissões e governança da Diretoria;
 5. a solicitação recebe um resultado/transição conforme estados que ainda serão definidos;
 6. quando houver aprovação, o sistema cria ou vincula o associado conforme regras de deduplicação;
-7. liberação de acesso e situação cadastral seguem regras próprias, ainda a detalhar.
+7. categoria estatutária é atribuída conforme regra aprovada;
+8. liberação de acesso e situação cadastral seguem `membership-model.md` e regras complementares.
 
-Os nomes dos estados do passo 5 **não estão definidos**. Termos como `pendente`, `aprovada`, `rejeitada` ou `correção` só devem ser implementados após validação explícita.
+Os nomes dos estados da solicitação **não estão definidos**. Termos como `pendente`, `aprovada`, `rejeitada` ou `correção` só devem ser implementados após validação explícita.
 
 ## Decisões pendentes
 
@@ -74,13 +88,13 @@ Os nomes dos estados do passo 5 **não estão definidos**. Termos como `pendente
 - documentos/anexos necessários;
 - finalidade de cada dado pessoal;
 - estados e transições da solicitação;
-- responsável ou perfil autorizado a analisar;
+- perfil operacional autorizado a analisar, respeitando a competência estatutária da Diretoria;
 - critérios de aprovação/rejeição;
 - necessidade de dupla validação ou assinatura;
 - tratamento de solicitação duplicada;
 - regra de identificação de pessoa existente;
 - momento de criação do usuário de acesso;
-- momento de definição da categoria;
+- critérios/momento de definição da categoria estatutária;
 - momento de ativação do associado;
 - notificações ao candidato;
 - retenção de solicitações rejeitadas/abandonadas.
