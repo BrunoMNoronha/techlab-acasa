@@ -20,7 +20,7 @@ export function LoginForm() {
   const hasError = state.status === "error";
 
   return (
-    <form action={formAction} className="space-y-5" noValidate={false}>
+    <form action={formAction} className="space-y-5">
       <FormMessage id={MESSAGE_ID} state={state} />
 
       <div>
