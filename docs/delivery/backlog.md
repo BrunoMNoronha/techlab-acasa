@@ -89,7 +89,7 @@ Este backlog organiza trabalho, mas **não transforma itens pendentes em requisi
 - apenas variáveis públicas (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`); nenhum segredo versionado;
 - testes Vitest para clientes, Proxy, identidade, ações de login/recuperação/nova senha, callback e rota protegida (negativo e positivo); 8/8 pgTAP preservados.
 
-**Evidência:** Issue #10 e PR correspondente; CI validou aplicação e banco local. Nenhum ambiente Supabase/Vercel remoto foi criado ou alterado.
+**Evidência:** Issue #10 e PR #11; CI validou aplicação e banco local, e o fluxo completo (login, logout, recuperação PKCE, bloqueio de signup) foi validado contra a stack Supabase local. Nenhum ambiente Supabase/Vercel remoto foi criado ou alterado.
 
 ### P1-05 — Observabilidade e gestão de segredos
 - configuração por ambiente;
