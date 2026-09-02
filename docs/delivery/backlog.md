@@ -78,13 +78,18 @@ Este backlog organiza trabalho, mas **não transforma itens pendentes em requisi
 
 **Evidência:** PR #8; CI validou aplicação e banco local, com 8/8 testes pgTAP aprovados. Nenhum ambiente Supabase remoto foi modificado.
 
-### P1-04 — Autenticação e autorização base — PRÓXIMO
-- Supabase Auth;
-- SSR/cookies conforme integração oficial;
-- login/logout/recuperação;
-- proteção server-side;
-- perfil mínimo de usuário;
-- testes de acesso e RLS quando aplicável.
+### P1-04 — Autenticação e autorização base — CONCLUÍDO
+- Supabase Auth com `@supabase/ssr` 0.12.5 e `@supabase/supabase-js` 2.114.0 fixados;
+- clientes de navegador/servidor com cookies via `getAll`/`setAll` e `proxy.ts` (Next.js 16) renovando a sessão com redirecionamento otimista;
+- validação server-side com `getClaims()`; `getSession()` não é usado como base de autorização;
+- login com e-mail/senha, logout e recuperação de acesso (callback PKCE + nova senha) validados contra a stack local com SMTP local;
+- rota protegida `/area-restrita` com validação própria no servidor, negando acesso anônimo independentemente do Proxy;
+- cadastro público desabilitado na configuração local (`enable_signup = false`) até decisão de P2-08/P2-09; senha mínima 8;
+- somente identidade autenticado/anônimo; nenhuma tabela de perfil, migration ou policy nova — perfis e permissões permanecem em P2-05;
+- apenas variáveis públicas (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`); nenhum segredo versionado;
+- testes Vitest para clientes, Proxy, identidade, ações de login/recuperação/nova senha, callback e rota protegida (negativo e positivo); 8/8 pgTAP preservados.
+
+**Evidência:** Issue #10 e PR #11; CI validou aplicação e banco local, e o fluxo completo (login, logout, recuperação PKCE, bloqueio de signup) foi validado contra a stack Supabase local. Nenhum ambiente Supabase/Vercel remoto foi criado ou alterado.
 
 ### P1-05 — Observabilidade e gestão de segredos
 - configuração por ambiente;

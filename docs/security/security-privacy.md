@@ -83,7 +83,7 @@ Toda funcionalidade relevante deve considerar:
 ## Pendências que afetam segurança
 
 - modelo ACASA única x SaaS;
-- provedor de autenticação;
+- provedor de autenticação: **decidido** (Supabase Auth, ADR-0001); política de sessão e provedor de e-mail transacional de produção seguem pendentes;
 - matriz real de permissões;
 - campos pessoais necessários;
 - política de retenção;
