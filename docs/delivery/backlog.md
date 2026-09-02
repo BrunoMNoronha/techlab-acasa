@@ -64,14 +64,21 @@ Este backlog organiza trabalho, mas **não transforma itens pendentes em requisi
 
 **Evidência:** PR #5 e CI do branch `feat/application-foundation` validados antes do merge.
 
-### P1-03 — Banco e migrations — PRÓXIMO
-- configurar Supabase local/projeto de desenvolvimento sem segredos no repositório;
-- migrations SQL versionadas;
-- esquema inicial somente para entidades cujas regras já estejam suficientemente definidas;
-- seeds apenas se seguros e úteis;
-- categorias iniciais alinhadas ao Estatuto, sem CRUD livre que permita divergência normativa.
+### P1-03 — Banco e migrations — CONCLUÍDO
+- Supabase CLI `2.116.0` fixado como dependência de desenvolvimento;
+- configuração local versionada sem ligação com projeto remoto;
+- migrations SQL definidas como fonte de verdade do schema;
+- primeira migration limitada à tabela de referência `membership_categories`;
+- categorias estatutárias carregadas: Fundador, Benemérito e Contribuinte;
+- RLS habilitado e privilégios de `anon`/`authenticated` revogados;
+- nenhum estado cadastral pendente ou entidade `Associado` antecipado;
+- testes pgTAP cobrindo schema, três categorias e restrições de acesso;
+- CI de banco executando stack Supabase local, reset, lint e testes;
+- `db reset` reproduz o banco do zero e `db lint --level error` não reporta erro de schema.
 
-### P1-04 — Autenticação e autorização base
+**Evidência:** PR #8; CI validou aplicação e banco local, com 8/8 testes pgTAP aprovados. Nenhum ambiente Supabase remoto foi modificado.
+
+### P1-04 — Autenticação e autorização base — PRÓXIMO
 - Supabase Auth;
 - SSR/cookies conforme integração oficial;
 - login/logout/recuperação;
