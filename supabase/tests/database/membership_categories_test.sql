@@ -46,13 +46,21 @@ select ok(
 );
 
 select ok(
-  not has_table_privilege('anon', 'public.membership_categories', 'SELECT'),
-  'anon has no direct SELECT privilege'
+  not has_table_privilege(
+    'anon',
+    'public.membership_categories',
+    'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER'
+  ),
+  'anon has no direct table privilege (read or write)'
 );
 
 select ok(
-  not has_table_privilege('authenticated', 'public.membership_categories', 'SELECT'),
-  'authenticated has no direct SELECT privilege'
+  not has_table_privilege(
+    'authenticated',
+    'public.membership_categories',
+    'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER'
+  ),
+  'authenticated has no direct table privilege (read or write)'
 );
 
 select * from finish();
