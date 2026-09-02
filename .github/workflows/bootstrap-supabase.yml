@@ -1,0 +1,42 @@
+name: Bootstrap Supabase local
+
+on:
+  push:
+    branches:
+      - feat/database-foundation
+    paths:
+      - .github/workflows/bootstrap-supabase.yml
+
+permissions:
+  contents: write
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install pinned Supabase CLI
+        run: npm install --save-dev --save-exact supabase@2.116.0
+
+      - name: Initialize local Supabase project
+        run: npx supabase init
+
+      - name: Commit generated foundation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/bootstrap-supabase.yml
+          git add package.json package-lock.json supabase/
+          git commit -m "chore: initialize Supabase local development"
+          git push origin "HEAD:${{ github.ref_name }}"
