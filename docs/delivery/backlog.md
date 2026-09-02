@@ -52,16 +52,14 @@ Este backlog organiza trabalho, mas **não transforma itens pendentes em requisi
 - Vercel como hospedagem preferencial;
 - sem multi-tenancy.
 
-### P1-02 — Aplicação base e pipeline de qualidade — PRÓXIMO
-- scaffold do projeto;
-- lint;
-- typecheck;
-- testes mínimos;
-- build;
-- GitHub Actions;
-- README de execução local.
+### P1-02 — Aplicação base e pipeline de qualidade — CONCLUÍDO
+- scaffold Next.js 16 App Router com TypeScript, Tailwind CSS, ESLint, `src/` e alias `@/*`;
+- scripts `dev`, `build`, `start`, `lint`, `typecheck`, `test`;
+- Vitest + React Testing Library com teste da página inicial;
+- GitHub Actions executando `npm ci`, lint, typecheck, testes e build em Node.js 24;
+- README com pré-requisitos, instalação, execução e validação local.
 
-### P1-03 — Banco e migrations
+### P1-03 — Banco e migrations — PRÓXIMO
 - configurar Supabase local/projeto de desenvolvimento sem segredos no repositório;
 - migrations SQL versionadas;
 - esquema inicial somente para entidades cujas regras já estejam suficientemente definidas;
