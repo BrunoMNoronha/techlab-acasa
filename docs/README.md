@@ -17,9 +17,11 @@ Este diretório é a fonte oficial da documentação do projeto, em conjunto com
 - [`product/vision-mvp.md`](product/vision-mvp.md) — visão, usuários, objetivos, escopo e limites do MVP.
 - [`product/requirements.md`](product/requirements.md) — requisitos funcionais e não funcionais iniciais.
 - [`product/business-rules.md`](product/business-rules.md) — regras de negócio conhecidas e seu status de validação.
+- [`product/association-intake.md`](product/association-intake.md) — baseline do processo de inscrição pública e decisões ainda necessárias.
 
 ### Arquitetura
 - [`architecture/decision-log.md`](architecture/decision-log.md) — decisões arquiteturais, recomendações e pendências.
+- [`architecture/adr/0001-stack-mvp.md`](architecture/adr/0001-stack-mvp.md) — ADR da stack e arquitetura do MVP.
 
 ### Segurança e privacidade
 - [`security/security-privacy.md`](security/security-privacy.md) — baseline de segurança, LGPD, acesso e auditoria.
@@ -38,14 +40,13 @@ Este diretório é a fonte oficial da documentação do projeto, em conjunto com
 
 Devem ser criados conforme o produto evoluir, e não antecipadamente:
 
-- jornadas e fluxos detalhados;
+- catálogo de categorias e situações cadastrais;
 - matriz de perfis e permissões;
-- modelo de dados;
-- contratos de API;
-- ADRs formais;
+- modelo inicial de dados;
+- contratos de API somente quando houver contratos externos ou handlers relevantes a documentar;
 - estratégia de testes detalhada;
 - guia de desenvolvimento local;
 - arquitetura de implantação e observabilidade;
-- plano de migração, caso exista fonte de dados legada.
+- plano de migração de cadastros, caso existam dados não financeiros a importar.
 
 A criação desses documentos depende das decisões registradas em `delivery/risks-decisions.md`.
