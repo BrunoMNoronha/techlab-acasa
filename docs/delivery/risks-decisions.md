@@ -1,30 +1,51 @@
 # Riscos e decisões pendentes
 
-## Decisões prioritárias
+## Decisões resolvidas em 2026-09-02
+
+| ID | Decisão | Resultado |
+|---|---|---|
+| DP-001 | Escopo organizacional | sistema exclusivamente da ACASA no MVP; sem multi-tenancy/SaaS |
+| DP-002 | Inscrição pública | faz parte do MVP; detalhes do workflow ainda precisam ser refinados |
+| DP-003 | Escopo financeiro | controle administrativo + comprovantes manuais; gateway fora do MVP |
+| DP-007 | Desenvolvimento tradicional x OutSystems | desenvolvimento tradicional; OutSystems descartado nesta implementação |
+| DA-STACK | Stack/arquitetura inicial | definida no ADR-0001: monólito modular Next.js/TypeScript + Supabase + Vercel |
+
+## Decisões prioritárias ainda abertas
 
 | ID | Decisão | Por que importa | Bloqueia |
 |---|---|---|---|
-| DP-001 | ACASA única ou SaaS/multi-associação? | define isolamento, modelo de dados, autorização e complexidade | arquitetura de dados e tenancy |
-| DP-002 | Haverá inscrição pública de novos associados? | define perfil candidato, documentos, workflow e segurança | fluxo de ingresso |
-| DP-003 | Qual o escopo financeiro do MVP? | diferencia controle interno, comprovante e gateway | modelo financeiro e integrações |
-| DP-004 | Quais categorias reais existem? | evita hardcode e regras fictícias | categorias e associado |
-| DP-005 | Quais situações cadastrais reais existem? | define estados e transições válidas | situação cadastral |
-| DP-006 | Existe migração de dados? | afeta modelo, validação, cronograma e risco operacional | plano de migração |
-| DP-007 | Qual o ambiente local e quais restrições técnicas/organizacionais existem? | necessário para escolher stack com segurança | ADR de stack |
+| DP-004 | Quais categorias reais existem e quais regras as diferenciam? | evita hardcode e regras fictícias | categorias e associado |
+| DP-005 | Quais situações cadastrais reais existem e quais transições são válidas? | define estados e transições | situação cadastral |
+| DP-006A | Existem cadastros de associados a migrar? | histórico de pagamentos não será migrado, mas outros dados ainda não foram inventariados | plano de migração de cadastro |
+| DP-008 | Quais campos/documentos são obrigatórios na inscrição pública e qual a finalidade de cada dado? | define formulário, LGPD, validações e storage | implementação do ingresso |
+| DP-009 | Quais são os estados da solicitação de associação e quem analisa/aprova? | define workflow, permissões e auditoria | implementação do ingresso |
+| DP-010 | Quais regras reais de cobrança, competência, vencimento e adimplência? | define modelo financeiro e indicadores | financeiro |
+| DP-011 | Quais estados e motivos de análise de comprovante serão usados? | define workflow e auditoria | comprovantes |
+| DP-012 | Qual sistema operacional predomina no desenvolvimento local? | ajusta scripts/instruções; não bloqueia stack, pois Next.js suporta Windows/WSL, Linux e macOS | apenas documentação operacional |
+
+## Evidências recebidas
+
+### Ficha cadastral atual
+
+A ficha atual contém registro, data de nascimento, nome completo, CPF, RG, filiação, naturalidade, endereço residencial, endereço na comunidade, profissão, formação, telefone, e-mail, contato de emergência, observações administrativas, assinaturas, data de preenchimento e foto 3x4.
+
+Esses campos são referência do processo existente, não lista automática de campos obrigatórios do novo sistema. Finalidade e minimização devem ser avaliadas antes de implementação.
+
+### Controle atual de pagamentos
+
+O histórico da planilha não será migrado. Ela deverá ser analisada apenas para entendimento do processo legado de registro de pagamentos.
+
+Na revisão de 2026-09-02, o conteúdo tabular do arquivo anexado não ficou acessível no runtime utilizado, portanto nenhuma regra financeira foi inferida a partir dele.
 
 ## Decisões posteriores
 
-- autenticação e eventual MFA;
-- stack web definitiva;
-- banco/provedor;
-- object storage;
-- hospedagem;
-- e-mail transacional;
-- gateway de pagamento se aprovado;
-- matriz de permissões;
-- campos pessoais obrigatórios e sua finalidade;
-- retenção e descarte;
-- RPO/RTO e operação de backup;
+- região/plano/conta de Supabase e Vercel para produção;
+- serviço de e-mail transacional;
+- matriz detalhada de permissões;
+- política de retenção e descarte;
+- backup de arquivos privados;
+- RPO/RTO e testes de restauração;
+- observabilidade de produção;
 - metas numéricas de performance e disponibilidade.
 
 ## Registro de riscos
@@ -33,18 +54,20 @@
 |---|---|---:|---:|---|
 | R-001 | Expansão do MVP por copiar capacidades da referência Softaliza | Alta | Alto | exigir problema, usuário, valor e aceite para nova funcionalidade |
 | R-002 | Implementar regras fictícias de categoria/situação | Alta | Alto | bloquear implementação até validação dos valores reais |
-| R-003 | Escolha prematura de arquitetura/stack | Média | Alto | decidir somente após requisitos e restrições mínimas |
-| R-004 | Multi-tenancy antecipado sem necessidade | Média | Alto | manter single-context até decisão de produto |
-| R-005 | Financeiro crescer para contabilidade/conciliação completa | Alta | Alto | separar controle associativo de ERP financeiro |
-| R-006 | Coleta excessiva de dados pessoais | Média | Alto | finalidade e minimização antes de adicionar campos |
-| R-007 | Autorização apenas no frontend | Média | Crítico | controles server-side e testes negativos de acesso |
-| R-008 | Exposição de documentos/comprovantes privados | Média | Crítico | storage privado e autorização de download |
+| R-003 | Escolha prematura de arquitetura/stack | Baixa após ADR-0001 | Alto | manter ADR e revisar somente diante de nova restrição relevante |
+| R-004 | Multi-tenancy antecipado sem necessidade | Baixa | Alto | decisão explícita: ACASA única no MVP; proibir abstrações de tenant |
+| R-005 | Financeiro crescer para contabilidade/conciliação completa | Média | Alto | escopo confirmado: administrativo + comprovantes; gateway/ERP fora do MVP |
+| R-006 | Coleta excessiva de dados pessoais no formulário de ingresso | Alta | Alto | finalidade e minimização antes de transformar campos legados em obrigatórios |
+| R-007 | Autorização apenas no frontend | Média | Crítico | controles server-side, RLS quando aplicável e testes negativos de acesso |
+| R-008 | Exposição de documentos/comprovantes privados | Média | Crítico | storage privado, autorização e URLs assinadas curtas quando necessárias |
 | R-009 | Falta de trilha de auditoria em ações críticas | Média | Alto | definir eventos auditáveis por módulo |
-| R-010 | Migração descoberta tarde ou com dados de baixa qualidade | Média | Alto | inventário e amostra de dados na Fase 0 |
-| R-011 | Dependência forte de fornecedor sem análise | Média | Médio/Alto | comparar custo, lock-in, portabilidade e operação |
+| R-010 | Migração de cadastro descoberta tarde ou com dados de baixa qualidade | Média | Alto | inventariar apenas dados não financeiros que realmente precisem ser migrados |
+| R-011 | Dependência forte de fornecedor sem análise | Média | Médio/Alto | manter núcleo em PostgreSQL, isolar integrações e revisar custos antes de produção |
 | R-012 | Build/testes/documentação divergirem do produto | Média | Alto | Definition of Done, CI e revisão de diff |
 | R-013 | Backups existirem sem teste de restauração | Baixa/Média | Alto | validar restauração antes de operação crítica |
 | R-014 | Acessibilidade ser tratada apenas no fim | Média | Médio | padrões acessíveis desde componentes e testes de jornadas |
+| R-015 | Formulário público ser alvo de spam, upload malicioso ou abuso | Média | Alto | validação server-side, limites de upload, rate limiting/anti-abuso proporcional e logs |
+| R-016 | Fluxo de ingresso criar duplicidade de pessoa/associado | Média | Alto | definir identidade, deduplicação e conversão de solicitação para associado antes da implementação |
 
 ## Regra de escalonamento
 

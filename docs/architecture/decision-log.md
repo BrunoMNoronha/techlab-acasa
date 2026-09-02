@@ -16,53 +16,75 @@ O produto inicial será uma aplicação web responsiva para desktop, tablet e mo
 
 O repositório `BrunoMNoronha/techlab-acasa` é a fonte oficial de código e documentação.
 
-### DA-003 — Sem multi-tenancy antecipado
+### DA-003 — Sistema exclusivo da ACASA no MVP
 
-**Status:** BASELINE DE SEGURANÇA DE ESCOPO.
+**Status:** CONFIRMADA em 2026-09-02.
 
-Não introduzir abstrações multi-associação enquanto a decisão de produto sobre SaaS não estiver confirmada.
+O produto será inicialmente exclusivo da ACASA. Não introduzir `tenant_id`, abstrações multi-associação, white-label ou isolamento de tenants sem uma decisão futura explícita de transformar o produto em SaaS.
 
-## Recomendações atuais — não aprovadas
+### DA-004 — Desenvolvimento tradicional
 
-### DA-R01 — TypeScript + Next.js full-stack para MVP
+**Status:** CONFIRMADA em 2026-09-02.
 
-**Status:** RECOMENDAÇÃO.
+O projeto seguirá desenvolvimento tradicional. OutSystems não será utilizado nesta implementação.
 
-Razões atuais: reduzir complexidade inicial, compartilhar linguagem entre frontend/backend e manter um único artefato de aplicação enquanto o domínio ainda está sendo validado.
+### DA-005 — Monólito modular full-stack
 
-**Não implementar antes de:** validar restrições organizacionais, experiência da equipe, custos e necessidade de portabilidade.
+**Status:** ACEITA.
 
-### DA-R02 — PostgreSQL
+A fundação técnica adotará um monólito modular para o MVP, mantendo frontend, backend web e regras de aplicação no mesmo projeto/deploy, sem microserviços.
 
-**Status:** RECOMENDAÇÃO.
+Detalhes e alternativas estão em [`adr/0001-stack-mvp.md`](adr/0001-stack-mvp.md).
 
-A natureza relacional de associados, categorias, permissões, cobranças, pagamentos e auditoria favorece banco relacional transacional.
+### DA-006 — Stack web
 
-### DA-R03 — Object storage para arquivos
+**Status:** ACEITA.
 
-**Status:** RECOMENDAÇÃO.
+- Node.js 24 LTS;
+- TypeScript;
+- Next.js 16 App Router;
+- React;
+- Tailwind CSS;
+- componentes acessíveis reutilizáveis conforme necessidade.
 
-Documentos e comprovantes devem ficar em armazenamento de objetos com acesso controlado, sem armazenar binários no banco relacional salvo justificativa específica.
+Versões concretas devem ser fixadas pelo lockfile e mantidas em patches de segurança suportados. Como referência de segurança em 2026-09-02, Next.js 16.3 está na linha Active LTS e deve permanecer atualizado.
 
-### DA-R04 — Infraestrutura gerenciada para MVP
+### DA-007 — Dados, autenticação e arquivos
 
-**Status:** RECOMENDAÇÃO.
+**Status:** ACEITA para o MVP.
 
-Vercel, Supabase e serviços equivalentes podem reduzir esforço operacional, mas fornecedor e arquitetura de implantação permanecem pendentes.
+- PostgreSQL gerenciado pelo Supabase;
+- Supabase Auth;
+- Supabase Storage em buckets privados;
+- migrations SQL versionadas via Supabase CLI.
+
+Autorização deverá existir no servidor e, quando tabelas forem acessíveis pela Data API, também usar grants mínimos e Row Level Security compatível com o caso de uso.
+
+### DA-008 — Hospedagem web
+
+**Status:** ACEITA como opção preferencial do MVP.
+
+Vercel será a hospedagem preferencial para a aplicação Next.js devido à integração com Git e previews por branch/PR. Evitar dependência de recursos proprietários quando não houver benefício concreto, mantendo possibilidade de mudança de provedor.
+
+Esta decisão não autoriza contratação de plano pago.
 
 ## Decisões arquiteturais pendentes
 
 | ID | Decisão | Impacto |
 |---|---|---|
-| DA-P01 | ACASA única ou SaaS/multi-associação | modelo de dados, autorização, isolamento, autenticação, custos |
-| DA-P02 | Desenvolvimento tradicional ou OutSystems | licenciamento, portabilidade, governança, velocidade, integrações |
-| DA-P03 | Stack web definitiva | estrutura do repositório, padrões, testes, deploy |
-| DA-P04 | Provedor/estratégia de autenticação | sessões, recuperação, MFA, operação, custo |
-| DA-P05 | Banco e provedor gerenciado | migrations, backup, conectividade, custo |
-| DA-P06 | Object storage | autorização de arquivos, URLs assinadas, retenção |
-| DA-P07 | Hospedagem | CI/CD, observabilidade, domínios, segredos |
-| DA-P08 | Gateway de pagamentos, se entrar no MVP | webhooks, conciliação, segurança, custo, contrato |
-| DA-P09 | Serviço de e-mail | recuperação de acesso, notificações, entregabilidade |
+| DA-P01 | Região, conta e plano de Supabase para produção | residência/latência, custo, backup, operação |
+| DA-P02 | Plano/conta Vercel para produção | custo, ambientes, observabilidade, limites |
+| DA-P03 | Serviço de e-mail transacional | recuperação de acesso, confirmação de cadastro, notificações |
+| DA-P04 | Estratégia de backup de arquivos privados | recuperação de comprovantes/documentos; Storage não está coberto pelo backup do banco |
+| DA-P05 | RPO/RTO e política operacional de backup/restauração | disponibilidade e recuperação |
+| DA-P06 | Observabilidade de produção | detecção de erros, logs, alertas e diagnóstico |
+
+## Decisões retiradas do MVP
+
+- gateway Pix/boleto/cartão: fora do MVP após definição de financeiro administrativo + comprovantes manuais;
+- arquitetura SaaS/multi-tenant: fora do MVP;
+- OutSystems: descartado para esta implementação;
+- API backend independente/NestJS: não justificada no estágio atual.
 
 ## Processo para nova decisão relevante
 
