@@ -20,6 +20,7 @@ export const authMessages = {
   passwordUpdateFailed: "Não foi possível atualizar a senha. Tente novamente.",
   passwordUpdated: "Senha atualizada com sucesso. Entre com a nova senha.",
   sessionEnded: "Sessão encerrada.",
+  logoutFailed: "Não foi possível encerrar a sessão. Tente novamente.",
 } as const;
 
 /** Avisos exibidos via query string; somente chaves conhecidas são aceitas. */

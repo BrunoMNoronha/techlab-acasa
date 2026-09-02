@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import type { AuthFormState } from "@/lib/auth/form-state";
+import { hasPasswordRecoveryProof } from "@/lib/auth/identity";
 import { authMessages } from "@/lib/auth/messages";
 import { LOGIN_PATH } from "@/lib/auth/routes";
 import { isValidPassword, readFormString } from "@/lib/auth/validation";
@@ -25,7 +26,9 @@ export async function updatePassword(
   const supabase = await createSupabaseServerClient();
   const { data, error: claimsError } = await supabase.auth.getClaims();
 
-  if (claimsError || typeof data?.claims?.sub !== "string") {
+  // Somente sessões iniciadas por link de recuperação podem definir nova senha
+  // sem informar a senha atual; uma sessão comum é recusada.
+  if (claimsError || !hasPasswordRecoveryProof(data?.claims)) {
     return { status: "error", message: authMessages.recoverySessionInvalid };
   }
 

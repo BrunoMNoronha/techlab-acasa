@@ -49,7 +49,7 @@ describe("updatePassword", () => {
     expect(updateUser).not.toHaveBeenCalled();
   });
 
-  it("recusa atualização sem sessão de recuperação válida", async () => {
+  it("recusa atualização sem sessão", async () => {
     getClaims.mockResolvedValue({ data: null, error: null });
 
     const state = await updatePassword(initialAuthFormState, formDataOf("senha-longa-1"));
@@ -58,8 +58,23 @@ describe("updatePassword", () => {
     expect(updateUser).not.toHaveBeenCalled();
   });
 
+  it("recusa sessão comum por senha, que não prova posse do link de recuperação", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "user-1", amr: [{ method: "password", timestamp: Math.floor(Date.now() / 1000) }] } },
+      error: null,
+    });
+
+    const state = await updatePassword(initialAuthFormState, formDataOf("senha-longa-1"));
+
+    expect(state).toEqual({ status: "error", message: authMessages.recoverySessionInvalid });
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
   it("traduz erros conhecidos do Auth sem expor detalhes", async () => {
-    getClaims.mockResolvedValue({ data: { claims: { sub: "user-1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "user-1", amr: [{ method: "otp", timestamp: Math.floor(Date.now() / 1000) }] } },
+      error: null,
+    });
     updateUser.mockResolvedValueOnce({ error: { code: "same_password" } });
 
     expect(await updatePassword(initialAuthFormState, formDataOf("senha-longa-1"))).toEqual({
@@ -76,7 +91,10 @@ describe("updatePassword", () => {
   });
 
   it("atualiza a senha, encerra a sessão de recuperação e redireciona ao login", async () => {
-    getClaims.mockResolvedValue({ data: { claims: { sub: "user-1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "user-1", amr: [{ method: "otp", timestamp: Math.floor(Date.now() / 1000) }] } },
+      error: null,
+    });
     updateUser.mockResolvedValue({ error: null });
 
     await expect(

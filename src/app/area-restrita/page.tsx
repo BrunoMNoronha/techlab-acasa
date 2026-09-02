@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { requireAuthenticatedIdentity } from "@/lib/auth/identity";
-import { logout } from "./actions";
+import { LogoutForm } from "./logout-form";
 
 export const metadata: Metadata = {
   title: "Área restrita — TechLab+ ACASA",
@@ -26,14 +26,7 @@ export default async function ProtectedAreaPage() {
           funcionalidades de negócio.
         </p>
 
-        <form action={logout} className="mt-8">
-          <button
-            type="submit"
-            className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 font-semibold text-slate-900 hover:bg-slate-100"
-          >
-            Sair
-          </button>
-        </form>
+        <LogoutForm />
       </section>
     </main>
   );
