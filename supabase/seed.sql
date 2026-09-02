@@ -1,0 +1,3 @@
+-- Reference data required by the application is versioned in migrations.
+-- Keep this file for local Supabase reset compatibility; do not add production-like
+-- personal data or secrets here.
