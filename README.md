@@ -1,10 +1,58 @@
 # TechLab+ ACASA
 
-Sistema web em planejamento para centralizar a gestão administrativa da ACASA e o relacionamento digital com seus associados.
+Sistema web para centralizar a gestão administrativa da ACASA e o relacionamento digital com seus associados.
 
 ## Estado atual
 
-O projeto está na fase de **descoberta, definição de requisitos e decisões de arquitetura**. Ainda não existe stack técnica definitivamente aprovada nem implementação funcional do produto.
+O projeto possui a arquitetura do MVP definida e está iniciando a **fundação técnica executável**. Funcionalidades de negócio continuam sendo implementadas somente a partir dos requisitos e decisões versionados em `docs/`.
+
+## Stack do MVP
+
+Conforme o [ADR-0001](docs/architecture/adr/0001-stack-mvp.md):
+
+- Node.js 24 LTS;
+- TypeScript;
+- Next.js 16 App Router;
+- React;
+- Tailwind CSS;
+- PostgreSQL, Auth e Storage via Supabase nas fases correspondentes;
+- Vercel como hospedagem preferencial quando o deploy entrar no escopo;
+- GitHub Actions para qualidade contínua.
+
+A fundação atual **não integra Supabase nem Vercel ainda**.
+
+## Requisitos locais
+
+- Node.js 24;
+- npm compatível com a distribuição do Node 24.
+
+Se utilizar `nvm`:
+
+```bash
+nvm use
+```
+
+## Instalação e execução
+
+```bash
+npm ci
+npm run dev
+```
+
+A aplicação ficará disponível por padrão em `http://localhost:3000`.
+
+## Validação
+
+Execute antes de publicar alterações:
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
+
+O pipeline de CI executa as mesmas verificações em Node 24.
 
 ## Princípios
 
@@ -24,13 +72,15 @@ Documentos prioritários:
 - [Visão do produto e MVP](docs/product/vision-mvp.md)
 - [Requisitos iniciais](docs/product/requirements.md)
 - [Regras de negócio](docs/product/business-rules.md)
+- [Modelo de categorias e vínculo](docs/product/membership-model.md)
 - [Decisões arquiteturais](docs/architecture/decision-log.md)
+- [ADR da stack do MVP](docs/architecture/adr/0001-stack-mvp.md)
 - [Segurança e privacidade](docs/security/security-privacy.md)
 - [Backlog por fases](docs/delivery/backlog.md)
 - [Riscos e decisões pendentes](docs/delivery/risks-decisions.md)
 - [Definition of Done e critérios do MVP](docs/delivery/definition-of-done.md)
 - [Instruções para agentes](docs/agents/project-instructions.md)
 
-## Próxima fase
+## Próximos passos
 
-Resolver as decisões bloqueadoras registradas em [`docs/delivery/risks-decisions.md`](docs/delivery/risks-decisions.md), especialmente escopo organizacional, ingresso de associados, financeiro do MVP, categorias/situações reais, migração e restrições técnicas. Somente então a stack e a fundação de implementação devem ser fechadas.
+Após estabilizar esta fundação, as próximas tarefas são banco/migrations, autenticação/autorização e demais módulos conforme o backlog. Nenhuma regra funcional pendente deve ser antecipada na infraestrutura base.
