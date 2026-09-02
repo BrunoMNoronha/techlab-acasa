@@ -2,7 +2,7 @@
 
 ## Convenção de status
 
-- **APROVADO** — requisito de produto explicitamente aceito.
+- **APROVADO** — requisito de produto explicitamente aceito ou confirmado por fonte normativa vigente.
 - **BASELINE** — faz parte do escopo preliminar aceito para detalhamento, mas regras específicas ainda podem mudar.
 - **PENDENTE** — depende de decisão da ACASA antes de implementação.
 - **FORA DO MVP** — não deve ser implementado sem replanejamento.
@@ -14,9 +14,9 @@
 | RF-001 | Permitir autenticação, logout, recuperação de acesso e controle de sessão. | BASELINE |
 | RF-002 | Restringir funcionalidades conforme perfil/permissões do usuário. | BASELINE |
 | RF-003 | Permitir cadastrar, editar, consultar, pesquisar e filtrar associados. | BASELINE |
-| RF-004 | Permitir ativar/inativar associado sem perda indevida de histórico. | BASELINE |
-| RF-005 | Permitir associar categoria e acompanhar situação cadastral. | BASELINE; valores reais PENDENTES |
-| RF-006 | Permitir administrar categorias de associados. | BASELINE; regras reais PENDENTES |
+| RF-004 | Permitir encerrar e reativar/readmitir vínculo sem perda indevida de histórico, conforme regras aprovadas. | BASELINE; transições normativas parcialmente confirmadas |
+| RF-005 | Permitir associar categoria estatutária e acompanhar situação cadastral separadamente da financeira. | APROVADO para categorias; normalização de estados cadastrais documentada em `membership-model.md` |
+| RF-006 | Disponibilizar as categorias estatutárias Fundadores, Beneméritos e Contribuintes, impedindo alteração cotidiana sem autorização/governança adequada. | APROVADO pelo Estatuto 2025 |
 | RF-007 | Registrar histórico mínimo de operações administrativas relevantes. | BASELINE |
 | RF-008 | Permitir cadastrar e consultar cobranças. | APROVADO; regras de geração/competência PENDENTES |
 | RF-009 | Permitir registrar administrativamente pagamentos e consultar histórico financeiro produzido pelo novo sistema. | APROVADO |
@@ -26,12 +26,13 @@
 | RF-013 | Permitir publicar comunicados internos e disponibilizá-los aos destinatários autorizados. | BASELINE |
 | RF-014 | Disponibilizar dashboard administrativo somente com indicadores derivados de dados e requisitos aprovados. | BASELINE |
 | RF-015 | Permitir envio e análise administrativa de comprovantes manuais, com resultado e responsável rastreáveis. | APROVADO |
-| RF-016 | Permitir inscrição pública de candidatos a associado e fluxo de análise administrativa. | APROVADO; estados/campos/documentos/responsável PENDENTES |
+| RF-016 | Permitir inscrição pública de candidatos a associado e fluxo de análise administrativa. | APROVADO; estados/campos/documentos/delegação operacional PENDENTES |
 | RF-017 | Integrar gateway para Pix, boleto ou cartão. | FORA DO MVP |
 | RF-018 | Oferecer apps móveis nativos. | FORA DO MVP |
 | RF-019 | Oferecer votação eletrônica, cursos/LMS, Wallet, API pública e financeiro avançado. | FORA DO MVP |
 | RF-020 | Converter uma solicitação aprovada em vínculo de associado sem duplicar dados desnecessariamente, conforme regras de ingresso validadas. | BASELINE |
 | RF-021 | Manter situação da solicitação de ingresso separada da situação cadastral e financeira do associado. | BASELINE |
+| RF-022 | Registrar desligamento voluntário, exclusão ex officio, eventual recurso e readmissão preservando histórico suficiente para auditoria. | BASELINE derivada do Estatuto |
 
 ## Requisitos não funcionais
 
@@ -55,7 +56,15 @@
 
 Associado, Categoria, Usuário, Perfil, Permissão, Solicitação de Associação, Cobrança, Pagamento, Comprovante, Documento, Comunicado e Auditoria.
 
-A existência conceitual dessas entidades não aprova todos os seus campos.
+### Categorias confirmadas
+
+Fonte: Estatuto ACASA 2025, Art. 12.
+
+- Fundadores;
+- Beneméritos;
+- Contribuintes.
+
+Ver `membership-model.md` para critérios normativos e modelagem da situação cadastral.
 
 ### Evidência do cadastro atual
 
@@ -73,10 +82,10 @@ Esses campos são **evidência do processo atual**, não uma aprovação automá
 
 Antes de implementar os requisitos afetados, devem ser resolvidas as decisões sobre:
 
-1. categorias reais e suas regras;
-2. situações cadastrais reais e transições;
+1. critérios operacionais de enquadramento nas categorias estatutárias, especialmente Benemérito e Contribuinte;
+2. confirmação da normalização operacional dos estados `ATIVO`, `DESLIGADO_VOLUNTARIAMENTE` e `EXCLUIDO_EX_OFFICIO`, além do fluxo de recurso/readmissão;
 3. campos/documentos obrigatórios no ingresso e finalidade de cada dado;
-4. estados do processo de solicitação e responsável(is) pela análise/aprovação;
+4. estados do processo de solicitação e perfis operacionais responsáveis pela análise/aprovação;
 5. regras de cobrança, competência, vencimento e definição de adimplência;
 6. necessidade de migração de cadastros não financeiros;
 7. sistema operacional predominante do ambiente local, apenas para ajustar instruções operacionais caso necessário.

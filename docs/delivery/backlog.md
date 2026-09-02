@@ -10,7 +10,9 @@ Este backlog organiza trabalho, mas **não transforma itens pendentes em requisi
 ### P0-02 — Mapear processo real de associação — EM ANDAMENTO
 **Decisão já tomada:** inscrição pública fará parte do MVP.
 
-**Pendente:** campos/documentos obrigatórios, finalidade dos dados, estados da solicitação, responsáveis, critérios de aprovação/rejeição e regras de conversão em associado.
+**Confirmado pelo Estatuto 2025:** a Diretoria possui competência para admitir/demitir sócios.
+
+**Pendente:** campos/documentos obrigatórios, finalidade dos dados, estados da solicitação, delegação operacional/perfis, critérios de aprovação/rejeição e regras de conversão em associado.
 
 **Aceite:** fluxo e regras documentados com critérios de aceite e permissões.
 
@@ -19,10 +21,16 @@ Este backlog organiza trabalho, mas **não transforma itens pendentes em requisi
 
 **Pendente para detalhamento:** competência, vencimento, adimplência e workflow exato de comprovantes.
 
-### P0-04 — Levantar categorias e situações reais — PENDENTE
-**Objetivo:** obter valores e regras usadas pela ACASA.
+### P0-04 — Levantar categorias e situações reais — PARCIALMENTE CONCLUÍDO
+**Categorias confirmadas pelo Estatuto 2025, Art. 12:** Fundadores, Beneméritos e Contribuintes.
 
-**Aceite:** catálogo validado e transições relevantes documentadas.
+**Ciclo de vínculo confirmado:** admissão, desligamento/exclusão por vontade própria, exclusão ex officio, recurso à Assembleia Geral e possibilidade de readmissão.
+
+**Normalização recomendada para o sistema:** `ATIVO`, `DESLIGADO_VOLUNTARIAMENTE` e `EXCLUIDO_EX_OFFICIO`; readmissão como transição para `ATIVO`.
+
+**Pendente:** confirmar a normalização operacional acima e detalhar fluxo de recurso/readmissão. Não criar `SUSPENSO` ou `INATIVO` sem nova base normativa.
+
+**Referência:** `../product/membership-model.md`.
 
 ### P0-05 — Avaliar migração — PARCIAL
 **Confirmado:** histórico da planilha de pagamentos não será migrado; arquivo serve apenas como referência operacional.
@@ -57,7 +65,8 @@ Este backlog organiza trabalho, mas **não transforma itens pendentes em requisi
 - configurar Supabase local/projeto de desenvolvimento sem segredos no repositório;
 - migrations SQL versionadas;
 - esquema inicial somente para entidades cujas regras já estejam suficientemente definidas;
-- seeds apenas se seguros e úteis.
+- seeds apenas se seguros e úteis;
+- categorias iniciais alinhadas ao Estatuto, sem CRUD livre que permita divergência normativa.
 
 ### P1-04 — Autenticação e autorização base
 - Supabase Auth;
@@ -75,8 +84,11 @@ Este backlog organiza trabalho, mas **não transforma itens pendentes em requisi
 
 ## Fase 2 — Administração e ingresso de associados
 
-### P2-01 — Categorias
-CRUD compatível com categorias/regras aprovadas.
+### P2-01 — Categorias estatutárias
+- disponibilizar Fundadores, Beneméritos e Contribuintes;
+- vincular categoria ao associado;
+- impedir alteração cotidiana sem autorização/governança apropriada;
+- auditar mudanças quando houver alteração normativa futura.
 
 ### P2-02 — Associados
 Cadastro, edição, consulta e validações.
@@ -85,10 +97,10 @@ Cadastro, edição, consulta e validações.
 Paginação e filtros necessários à operação real.
 
 ### P2-04 — Situação cadastral
-Estados/transições apenas conforme decisão aprovada.
+Implementar estados/transições apenas conforme `membership-model.md` e decisão final de normalização; preservar histórico de desligamento, exclusão, recurso e readmissão.
 
 ### P2-05 — Perfis e permissões
-Matriz mínima de administração com validação server-side.
+Matriz mínima de administração com validação server-side e respeito à competência estatutária da Diretoria para admissão/demissão de sócios.
 
 ### P2-06 — Auditoria administrativa
 Registrar operações críticas definidas para o módulo.
@@ -120,7 +132,7 @@ Modelo, criação e consulta conforme regras aprovadas.
 Registro administrativo e consulta.
 
 ### P3-03 — Situação financeira
-Pendências e adimplência sem alterar automaticamente situação cadastral sem regra explícita.
+Pendências e adimplência sem alterar automaticamente situação cadastral. O Regimento utiliza inadimplência no contexto financeiro/operacional das taxas nele disciplinadas.
 
 ### P3-04 — Comprovantes — APROVADO PARA O MVP
 - upload privado;
@@ -138,7 +150,7 @@ Não implementar Pix/boleto/cartão automatizado sem replanejamento futuro.
 Acesso somente ao próprio contexto autorizado.
 
 ### P4-02 — Dados e situação
-Consulta dos próprios dados, categoria e situação.
+Consulta dos próprios dados, categoria estatutária e situação cadastral/financeira separadas.
 
 ### P4-03 — Financeiro
 Consulta de cobranças/pagamentos permitidos.

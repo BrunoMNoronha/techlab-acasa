@@ -7,6 +7,7 @@
 | DP-001 | Escopo organizacional | sistema exclusivamente da ACASA no MVP; sem multi-tenancy/SaaS |
 | DP-002 | Inscrição pública | faz parte do MVP; detalhes do workflow ainda precisam ser refinados |
 | DP-003 | Escopo financeiro | controle administrativo + comprovantes manuais; gateway fora do MVP |
+| DP-004 | Categorias reais | Estatuto 2025, Art. 12: Fundadores, Beneméritos e Contribuintes |
 | DP-007 | Desenvolvimento tradicional x OutSystems | desenvolvimento tradicional; OutSystems descartado nesta implementação |
 | DA-STACK | Stack/arquitetura inicial | definida no ADR-0001: monólito modular Next.js/TypeScript + Supabase + Vercel |
 
@@ -14,16 +15,33 @@
 
 | ID | Decisão | Por que importa | Bloqueia |
 |---|---|---|---|
-| DP-004 | Quais categorias reais existem e quais regras as diferenciam? | evita hardcode e regras fictícias | categorias e associado |
-| DP-005 | Quais situações cadastrais reais existem e quais transições são válidas? | define estados e transições | situação cadastral |
+| DP-005 | Confirmar a normalização operacional da situação cadastral e fluxo de recurso/readmissão | o Estatuto define eventos do vínculo, mas não enumera estados de sistema | situação cadastral |
 | DP-006A | Existem cadastros de associados a migrar? | histórico de pagamentos não será migrado, mas outros dados ainda não foram inventariados | plano de migração de cadastro |
 | DP-008 | Quais campos/documentos são obrigatórios na inscrição pública e qual a finalidade de cada dado? | define formulário, LGPD, validações e storage | implementação do ingresso |
-| DP-009 | Quais são os estados da solicitação de associação e quem analisa/aprova? | define workflow, permissões e auditoria | implementação do ingresso |
+| DP-009 | Quais são os estados da solicitação de associação e quais perfis operacionalizam a análise/aprovação? | o Estatuto atribui à Diretoria competência para admitir/demitir; falta detalhar o workflow de sistema | implementação do ingresso |
 | DP-010 | Quais regras reais de cobrança, competência, vencimento e adimplência? | define modelo financeiro e indicadores | financeiro |
 | DP-011 | Quais estados e motivos de análise de comprovante serão usados? | define workflow e auditoria | comprovantes |
-| DP-012 | Qual sistema operacional predomina no desenvolvimento local? | ajusta scripts/instruções; não bloqueia stack, pois Next.js suporta Windows/WSL, Linux e macOS | apenas documentação operacional |
+| DP-012 | Qual sistema operacional predomina no desenvolvimento local? | ajusta scripts/instruções; não bloqueia stack | apenas documentação operacional |
 
 ## Evidências recebidas
+
+### Estatuto ACASA 2025
+
+O Estatuto confirma:
+
+- três categorias de sócios no Art. 12: **Fundadores, Beneméritos e Contribuintes**;
+- possibilidade de exclusão por vontade própria ou ex officio;
+- hipóteses estatutárias para exclusão ex officio;
+- recurso da decisão de exclusão à Assembleia Geral;
+- possibilidade de readmissão;
+- competência da Diretoria para admitir/demitir sócios;
+- participação da Assembleia Geral pelos sócios em pleno gozo de seus direitos estatutários.
+
+O Estatuto não enumera formalmente estados cadastrais como Ativo, Inativo ou Suspenso. A normalização recomendada está registrada em `../product/membership-model.md`.
+
+### Regimento Interno ACASA 2025
+
+O Regimento usa **inadimplente** no contexto financeiro/operacional das taxas relacionadas ao serviço de água. Essa evidência reforça que inadimplência deve permanecer separada da situação cadastral do associado.
 
 ### Ficha cadastral atual
 
@@ -39,6 +57,7 @@ Na revisão de 2026-09-02, o conteúdo tabular do arquivo anexado não ficou ace
 
 ## Decisões posteriores
 
+- critérios operacionais de enquadramento nas categorias estatutárias;
 - região/plano/conta de Supabase e Vercel para produção;
 - serviço de e-mail transacional;
 - matriz detalhada de permissões;
@@ -53,14 +72,14 @@ Na revisão de 2026-09-02, o conteúdo tabular do arquivo anexado não ficou ace
 | ID | Risco | Prob. | Impacto | Tratamento inicial |
 |---|---|---:|---:|---|
 | R-001 | Expansão do MVP por copiar capacidades da referência Softaliza | Alta | Alto | exigir problema, usuário, valor e aceite para nova funcionalidade |
-| R-002 | Implementar regras fictícias de categoria/situação | Alta | Alto | bloquear implementação até validação dos valores reais |
+| R-002 | Divergir do Estatuto ao inventar categorias ou estados | Média | Alto | usar `membership-model.md`; não criar categorias extras nem suspensão/inatividade sem nova base normativa |
 | R-003 | Escolha prematura de arquitetura/stack | Baixa após ADR-0001 | Alto | manter ADR e revisar somente diante de nova restrição relevante |
 | R-004 | Multi-tenancy antecipado sem necessidade | Baixa | Alto | decisão explícita: ACASA única no MVP; proibir abstrações de tenant |
 | R-005 | Financeiro crescer para contabilidade/conciliação completa | Média | Alto | escopo confirmado: administrativo + comprovantes; gateway/ERP fora do MVP |
 | R-006 | Coleta excessiva de dados pessoais no formulário de ingresso | Alta | Alto | finalidade e minimização antes de transformar campos legados em obrigatórios |
 | R-007 | Autorização apenas no frontend | Média | Crítico | controles server-side, RLS quando aplicável e testes negativos de acesso |
 | R-008 | Exposição de documentos/comprovantes privados | Média | Crítico | storage privado, autorização e URLs assinadas curtas quando necessárias |
-| R-009 | Falta de trilha de auditoria em ações críticas | Média | Alto | definir eventos auditáveis por módulo |
+| R-009 | Falta de trilha de auditoria em ações críticas | Média | Alto | definir eventos auditáveis por módulo, incluindo exclusão/readmissão |
 | R-010 | Migração de cadastro descoberta tarde ou com dados de baixa qualidade | Média | Alto | inventariar apenas dados não financeiros que realmente precisem ser migrados |
 | R-011 | Dependência forte de fornecedor sem análise | Média | Médio/Alto | manter núcleo em PostgreSQL, isolar integrações e revisar custos antes de produção |
 | R-012 | Build/testes/documentação divergirem do produto | Média | Alto | Definition of Done, CI e revisão de diff |
@@ -68,6 +87,7 @@ Na revisão de 2026-09-02, o conteúdo tabular do arquivo anexado não ficou ace
 | R-014 | Acessibilidade ser tratada apenas no fim | Média | Médio | padrões acessíveis desde componentes e testes de jornadas |
 | R-015 | Formulário público ser alvo de spam, upload malicioso ou abuso | Média | Alto | validação server-side, limites de upload, rate limiting/anti-abuso proporcional e logs |
 | R-016 | Fluxo de ingresso criar duplicidade de pessoa/associado | Média | Alto | definir identidade, deduplicação e conversão de solicitação para associado antes da implementação |
+| R-017 | Tratar inadimplência de taxa de serviço como estado cadastral do associado | Média | Alto | separar domínios cadastral, financeiro associativo e taxas/serviços no modelo |
 
 ## Regra de escalonamento
 
