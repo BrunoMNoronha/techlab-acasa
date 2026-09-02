@@ -4,7 +4,7 @@ Sistema web para centralizar a gestão administrativa da ACASA e o relacionament
 
 ## Estado atual
 
-O projeto possui a arquitetura do MVP definida, a fundação executável da aplicação e a fundação local/versionada do banco de dados. Funcionalidades de negócio continuam sendo implementadas somente a partir dos requisitos e decisões versionados em `docs/`.
+O projeto possui a arquitetura do MVP definida, a fundação executável da aplicação, a fundação local/versionada do banco de dados e a base de autenticação/autorização com Supabase Auth (login, logout, recuperação de acesso e rota protegida validada no servidor). Funcionalidades de negócio continuam sendo implementadas somente a partir dos requisitos e decisões versionados em `docs/`.
 
 ## Stack do MVP
 
@@ -41,7 +41,7 @@ npm ci
 npm run dev
 ```
 
-A aplicação ficará disponível por padrão em `http://localhost:3000`.
+A aplicação ficará disponível por padrão em `http://localhost:3000`. Para os fluxos de autenticação, acesse pelo endereço configurado como `site_url` da stack local (`http://127.0.0.1:3000`) — veja a seção [Autenticação local](#autenticação-local).
 
 ## Banco de dados local
 
@@ -73,6 +73,54 @@ npm run db:stop
 ```
 
 A stack local é destinada exclusivamente a desenvolvimento/testes e não deve ser exposta publicamente. Não use `supabase link`, `supabase db push` ou comandos equivalentes contra ambiente remoto sem uma tarefa específica e configuração segura de credenciais.
+
+## Autenticação local
+
+A autenticação usa **Supabase Auth** com `@supabase/ssr` (sessão em cookies, clientes de navegador/servidor separados e `proxy.ts` do Next.js 16 para renovação de sessão). A validação de identidade no servidor usa `supabase.auth.getClaims()`; `getSession()` não é usado como base de autorização.
+
+### Variáveis de ambiente
+
+A aplicação usa somente variáveis públicas:
+
+| Variável | Descrição |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | URL da API do Supabase (`http://127.0.0.1:54321` na stack local). |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Chave publicável (`sb_publishable_...`), segura para o navegador. |
+
+Nenhuma chave secreta/`service_role` é usada pela aplicação. Copie `.env.example` para `.env.local` (ignorado pelo Git) e preencha com os valores exibidos por:
+
+```bash
+npx supabase status
+```
+
+### Rotas
+
+| Rota | Função |
+|---|---|
+| `/login` | Login com e-mail e senha. |
+| `/recuperar-acesso` | Solicitação de recuperação de acesso por e-mail. |
+| `/auth/callback` | Callback PKCE que troca o código recebido por sessão. |
+| `/redefinir-senha` | Definição de nova senha (exige sessão de recuperação válida). |
+| `/area-restrita` | Rota autenticada de demonstração, com validação server-side própria e logout. |
+
+### Regras da configuração local (`supabase/config.toml`)
+
+- cadastro público de usuários (`enable_signup`) está **desabilitado**; a criação de contas para candidatos será decidida em P2-08/P2-09;
+- senha mínima de 8 caracteres;
+- e-mails são capturados pelo servidor SMTP local em `http://127.0.0.1:54324` (nenhum e-mail real é enviado);
+- `site_url` e `additional_redirect_urls` permitem apenas `http://127.0.0.1:3000` e `http://localhost:3000`. Use o **mesmo host** para solicitar e concluir a recuperação de senha, pois o fluxo PKCE depende de cookies do navegador.
+
+### Usuário de desenvolvimento
+
+Como não há cadastro público, crie usuários de teste administrativamente no Supabase Studio local (`http://127.0.0.1:54323` → Authentication → Users → Add user), com senha de pelo menos 8 caracteres. Não versione credenciais de teste.
+
+### Validação manual sugerida
+
+1. `npm run db:start`, `npm run db:reset` e configure `.env.local`;
+2. `npm run dev` e acesse `http://127.0.0.1:3000/login`;
+3. confirme que `/area-restrita` redireciona para o login sem sessão e abre após o login;
+4. use **Sair** e confirme o retorno ao login;
+5. em `/recuperar-acesso`, solicite a recuperação, abra o e-mail em `http://127.0.0.1:54324`, siga o link e defina a nova senha.
 
 ## Validação
 
@@ -127,4 +175,4 @@ Documentos prioritários:
 
 ## Próximos passos
 
-Após estabilizar a fundação do banco, a próxima etapa técnica é autenticação/autorização base. Entidades e campos de negócio só devem ser adicionados quando suas regras estiverem suficientemente definidas.
+Com a base de autenticação estabelecida, a próxima etapa técnica é observabilidade e gestão de segredos por ambiente (P1-05). Perfis/permissões administrativas (P2-05) e a inscrição pública (P2-08/P2-09) dependem de decisões ainda registradas como pendentes. Entidades e campos de negócio só devem ser adicionados quando suas regras estiverem suficientemente definidas.

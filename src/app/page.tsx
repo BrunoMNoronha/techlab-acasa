@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { LOGIN_PATH } from "@/lib/auth/routes";
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-16 text-slate-950 sm:px-10 lg:px-16">
@@ -19,6 +22,15 @@ export default function Home() {
         <p className="mt-6 max-w-2xl text-lg text-slate-700">
           Esta aplicação inicia a base executável do sistema de gestão da ACASA,
           sem antecipar regras de negócio ainda não implementadas.
+        </p>
+
+        <p className="mt-8">
+          <Link
+            href={LOGIN_PATH}
+            className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-5 py-2.5 font-semibold text-white hover:bg-slate-800"
+          >
+            Entrar
+          </Link>
         </p>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
