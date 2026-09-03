@@ -1,0 +1,21 @@
+# Normalização de fim de linha.
+#
+# O `.editorconfig` declara `end_of_line = lf`, mas essa convenção só é
+# aplicada por editores que o honram. Este arquivo torna a regra efetiva no
+# próprio Git: todo arquivo de texto é armazenado com LF no índice,
+# independentemente do sistema operacional de quem contribui.
+#
+# Isso protege, em especial, as migrations SQL versionadas, que são a fonte de
+# verdade do schema e precisam reproduzir o banco do zero em qualquer ambiente.
+* text=auto eol=lf
+
+# Arquivos binários nunca devem sofrer conversão de fim de linha.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary

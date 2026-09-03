@@ -40,6 +40,9 @@ jobs:
       - name: Check tracked files for secret markers
         run: npm run check:secrets
 
+      - name: Check tracked files for line endings
+        run: npm run check:eol
+
       - name: Lint
         run: npm run lint
 

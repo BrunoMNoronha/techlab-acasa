@@ -137,6 +137,7 @@ Execute antes de publicar alterações:
 
 ```bash
 npm run check:secrets
+npm run check:eol
 npm run lint
 npm run typecheck
 npm test
@@ -144,6 +145,8 @@ npm run build
 ```
 
 `check:secrets` varre os arquivos rastreados pelo Git em busca de marcadores de segredo (sem imprimir valores) e também roda na CI.
+
+`check:eol` confirma que os arquivos rastreados estão com fim de linha **LF no índice**, conforme o `.gitattributes` e o `.editorconfig`. A cópia local pode legitimamente estar em CRLF no Windows: a verificação observa apenas o que o Git armazena. Se algum arquivo for acusado, execute `git add --renormalize .` e confirme com `git ls-files --eol`.
 
 Quando houver mudança de banco, execute também:
 
@@ -155,7 +158,12 @@ npm run db:test
 npm run db:stop
 ```
 
-O pipeline de CI executa a verificação de marcadores de segredo e as verificações da aplicação em Node 24, e valida migrations/testes de banco em uma stack Supabase local isolada.
+O pipeline de CI executa as verificações de marcadores de segredo e de fim de linha, além das verificações da aplicação em Node 24, e valida migrations/testes de banco em uma stack Supabase local isolada.
+
+## Convenções do repositório
+
+- fim de linha **LF** para todo arquivo de texto, aplicado pelo `.gitattributes` (Git) e declarado no `.editorconfig` (editores), verificado por `npm run check:eol`;
+- a normalização mantém migrations SQL, scripts e workflows idênticos em qualquer sistema operacional, preservando a garantia de que `npm run db:reset` reproduz o banco do zero.
 
 ## Princípios
 
