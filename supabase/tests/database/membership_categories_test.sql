@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(8);
+select plan(12);
 
 select has_table(
   'public',
@@ -61,6 +61,42 @@ select ok(
     'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER'
   ),
   'authenticated has no direct table privilege (read or write)'
+);
+
+-- The constraints below are what keep this catalogue from degenerating into a
+-- free-form administrative table. Structural assertions alone would still pass
+-- if a future migration dropped them, so enforcement is tested explicitly.
+
+select throws_ok(
+  $$ insert into public.membership_categories (code, name)
+     values ('titular', 'Titular') $$,
+  '23514',
+  null,
+  'a code outside the approved format is rejected'
+);
+
+select throws_ok(
+  $$ insert into public.membership_categories (code, name)
+     values ('NOVA_CATEGORIA', '   ') $$,
+  '23514',
+  null,
+  'a blank display name is rejected'
+);
+
+select throws_ok(
+  $$ insert into public.membership_categories (code, name)
+     values ('NOVA_CATEGORIA', 'Fundador') $$,
+  '23505',
+  null,
+  'a duplicated display name is rejected'
+);
+
+select throws_ok(
+  $$ insert into public.membership_categories (code, name)
+     values ('NOVA_CATEGORIA', null) $$,
+  '23502',
+  null,
+  'a null display name is rejected'
 );
 
 select * from finish();
