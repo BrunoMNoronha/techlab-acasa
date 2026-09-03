@@ -7,6 +7,7 @@ import {
   isAnonymousOnlyPath,
   isProtectedPath,
 } from "@/lib/auth/routes";
+import { describeError, logger } from "@/lib/observability/logger";
 import { getSupabasePublicConfig } from "./env";
 
 /**
@@ -54,8 +55,11 @@ async function hasVerifiedClaims(supabase: SupabaseClient): Promise<boolean> {
     const { data, error } = await supabase.auth.getClaims();
 
     return !error && typeof data?.claims?.sub === "string";
-  } catch {
-    // Falha ao verificar a sessão: tratar como anônimo (negação por padrão).
+  } catch (error) {
+    // Exceção (não um resultado de "sessão inválida", que é fluxo normal):
+    // tratar como anônimo (negação por padrão) e registrar sem cookies/claims.
+    logger.warn("auth.session_check_failed", { ...describeError(error), routeType: "proxy" });
+
     return false;
   }
 }

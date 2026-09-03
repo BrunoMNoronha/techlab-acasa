@@ -37,6 +37,9 @@ jobs:
           node --version
           npm --version
 
+      - name: Check tracked files for secret markers
+        run: npm run check:secrets
+
       - name: Lint
         run: npm run lint
 

@@ -28,6 +28,9 @@ Este diretório é a fonte oficial da documentação do projeto, em conjunto com
 ### Segurança e privacidade
 - [`security/security-privacy.md`](security/security-privacy.md) — baseline de segurança, LGPD, acesso e auditoria.
 
+### Operação
+- [`operations/environments-observability.md`](operations/environments-observability.md) — ambientes, matriz de configuração, público x secreto, política de logs, captura de erros e resposta a vazamento de segredos.
+
 ### Entrega
 - [`delivery/backlog.md`](delivery/backlog.md) — backlog inicial por fases.
 - [`delivery/risks-decisions.md`](delivery/risks-decisions.md) — riscos e decisões de produto/técnicas pendentes.
@@ -47,7 +50,7 @@ Devem ser criados conforme o produto evoluir, e não antecipadamente:
 - contratos de API somente quando houver contratos externos ou handlers relevantes a documentar;
 - estratégia de testes detalhada;
 - guia de desenvolvimento local;
-- arquitetura de implantação e observabilidade;
+- arquitetura de implantação (a fundação de ambientes/observabilidade já está em `operations/environments-observability.md`; o restante depende da criação dos ambientes reais);
 - plano de migração de cadastros, caso existam dados não financeiros a importar.
 
 A criação desses documentos depende das decisões registradas em `delivery/risks-decisions.md`.

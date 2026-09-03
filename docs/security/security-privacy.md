@@ -67,6 +67,14 @@ A trilha de auditoria não deve permitir alteração ordinária pelo mesmo fluxo
 - backups e restauração validados conforme criticidade;
 - logs de erro sem exposição de tokens, senhas ou dados pessoais desnecessários.
 
+**Implementado em P1-05** (detalhes em [`../operations/environments-observability.md`](../operations/environments-observability.md)):
+
+- logger server-side estruturado com allow-list de campos: nunca recebe request, headers, cookies, claims, usuário, erro completo ou `process.env`; mensagem de erro só em desenvolvimento, stack nunca;
+- `onRequestError` do Next.js encaminha erros do servidor ao logger apenas com template da rota, tipo de rota, método, nome do erro e `digest`;
+- páginas de erro genéricas (`error.tsx`, `global-error.tsx`) sem detalhes técnicos;
+- `.env*` reais ignorados pelo Git, `npm run check:secrets` na CI, GitHub secret scanning e push protection ativos (camada adicional, com limitações documentadas) e procedimento de resposta a vazamento com revogação obrigatória;
+- validação de configuração que recusa chave secreta em variável `NEXT_PUBLIC_*` e não ecoa valores nas mensagens.
+
 ## Desenvolvimento seguro
 
 Toda funcionalidade relevante deve considerar:

@@ -91,11 +91,19 @@ Este backlog organiza trabalho, mas **não transforma itens pendentes em requisi
 
 **Evidência:** Issue #10 e PR #11; CI validou aplicação e banco local, e o fluxo completo (login, logout, recuperação PKCE, bloqueio de signup) foi validado contra a stack Supabase local. Nenhum ambiente Supabase/Vercel remoto foi criado ou alterado.
 
-### P1-05 — Observabilidade e gestão de segredos
-- configuração por ambiente;
-- erros/logs mínimos;
-- ausência de segredos no repositório;
-- preparação para preview/production sem autorizar custos pagos.
+### P1-05 — Observabilidade e gestão de segredos — CONCLUÍDO
+- logger server-side estruturado (JSON por linha em stdout/stderr) em `src/lib/observability/logger.ts`, com níveis `info|warn|error`, timestamp, evento estável, `environment` e **allow-list** de contexto; sem dependência runtime nova e sem provedor externo (ponto único para plugar um provedor no futuro);
+- `src/instrumentation.ts` com `onRequestError` encaminhando erros do servidor ao logger com template da rota, tipo de rota, método, nome do erro e `digest` — sem headers, cookies, path concreto ou query string;
+- `error.tsx` e `global-error.tsx` genéricos, acessíveis e com retry, sem detalhes técnicos;
+- logger aplicado somente a falhas técnicas do Auth (recuperação, logout, atualização de senha, exceção no Proxy); fluxos esperados (senha inválida, anônimo em rota protegida, validações) não geram log;
+- `getSupabasePublicConfig()` valida URL http(s), chave presente e recusa `sb_secret_` em variável pública, sem ecoar valores;
+- matriz de configuração Local/Preview/Production, distinção público x secreto, política de logs, campos proibidos, investigação de erro e procedimento de incidente de segredo em `docs/operations/environments-observability.md`; valores de Preview/Production marcados como inexistentes;
+- `.env*` reais ignorados (validado com `git check-ignore`), `.env.example` só com placeholders, `npm run check:secrets` (script sem terceiros) executado na CI;
+- GitHub secret scanning e push protection confirmados ativos via API (0 alertas), com limitações registradas; nenhum recurso pago contratado;
+- testes Vitest para logger, minimização, `onRequestError`, configuração e UI de erro (81 testes no total); 8/8 pgTAP preservados;
+- nenhum ambiente Vercel/Supabase remoto criado; nenhum serviço pago.
+
+**Evidência:** Issue #12 e PR #13; CI validou aplicação, verificação de segredos e banco local. Erro server-side controlado validado localmente: evento estruturado no terminal sem cookies/Authorization/token/e-mail e mensagem genérica ao usuário.
 
 ## Fase 2 — Administração e ingresso de associados
 

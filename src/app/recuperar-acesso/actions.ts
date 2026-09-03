@@ -5,6 +5,7 @@ import { authMessages } from "@/lib/auth/messages";
 import { getRequestOrigin } from "@/lib/auth/request-origin";
 import { AUTH_CALLBACK_PATH, PASSWORD_RESET_PATH } from "@/lib/auth/routes";
 import { isValidEmail, normalizeEmail, readFormString } from "@/lib/auth/validation";
+import { logger } from "@/lib/observability/logger";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function requestPasswordRecovery(
@@ -29,9 +30,10 @@ export async function requestPasswordRecovery(
   );
 
   if (error) {
-    // Registro sem e-mail nem token; a resposta ao usuário continua genérica.
-    console.error("[auth] Falha ao solicitar recuperação de acesso.", {
-      code: error.code,
+    // Sinal operacional (ex.: limite de envio, SMTP indisponível) sem e-mail,
+    // token ou mensagem do provedor; a resposta ao usuário continua genérica.
+    logger.warn("auth.password_recovery_request_failed", {
+      errorCode: error.code,
       status: error.status,
     });
   }

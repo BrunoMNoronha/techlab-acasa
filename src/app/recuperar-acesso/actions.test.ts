@@ -4,6 +4,11 @@ import { initialAuthFormState } from "@/lib/auth/form-state";
 import { authMessages } from "@/lib/auth/messages";
 
 const resetPasswordForEmail = vi.fn();
+const { warn } = vi.hoisted(() => ({ warn: vi.fn() }));
+
+vi.mock("@/lib/observability/logger", () => ({
+  logger: { info: vi.fn(), warn, error: vi.fn() },
+}));
 
 vi.mock("@/lib/supabase/server", () => ({
   createSupabaseServerClient: async () => ({ auth: { resetPasswordForEmail } }),
@@ -48,10 +53,13 @@ describe("requestPasswordRecovery", () => {
     expect(state).toEqual({ status: "success", message: authMessages.recoveryRequested });
   });
 
-  it("mantém a mesma resposta quando o Auth retorna erro, sem registrar o e-mail", async () => {
-    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+  it("mantém a mesma resposta quando o Auth retorna erro, registrando só código e status", async () => {
     resetPasswordForEmail.mockResolvedValue({
-      error: { message: "User not found", code: "user_not_found", status: 400 },
+      error: {
+        message: "Rate limit exceeded for ninguem@exemplo.org",
+        code: "over_email_send_rate_limit",
+        status: 429,
+      },
     });
 
     const state = await requestPasswordRecovery(
@@ -60,7 +68,12 @@ describe("requestPasswordRecovery", () => {
     );
 
     expect(state).toEqual({ status: "success", message: authMessages.recoveryRequested });
-    expect(consoleError).toHaveBeenCalledTimes(1);
-    expect(JSON.stringify(consoleError.mock.calls[0])).not.toContain("ninguem@exemplo.org");
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledWith("auth.password_recovery_request_failed", {
+      errorCode: "over_email_send_rate_limit",
+      status: 429,
+    });
+    expect(JSON.stringify(warn.mock.calls[0])).not.toContain("ninguem@exemplo.org");
+    expect(JSON.stringify(warn.mock.calls[0])).not.toContain("Rate limit");
   });
 });
