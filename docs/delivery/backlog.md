@@ -120,12 +120,21 @@ Este backlog organiza trabalho, mas **não transforma itens pendentes em requisi
 
 **Evidência:** Issue #14 e PR #15; CI validou aplicação e banco local, com 12/12 testes pgTAP aprovados. Nenhum ambiente remoto foi criado ou alterado.
 
-### P2-02 — Associados
+### P2-02 — Associados — BLOQUEADA POR DECISÃO DE PRODUTO (refinamento concluído)
 Cadastro, edição, consulta e validações.
 
 Inclui o **vínculo entre associado e categoria estatutária**, desmembrado da P2-01: a referência ao catálogo `membership_categories` deve ser criada junto da entidade `Associado`, com teste cobrindo a integridade do vínculo. Somente com essa entrega o RF-005 poderá ser considerado completo na parte de categoria.
 
-Depende das decisões DP-008 (campos e finalidade dos dados pessoais) e, para a situação cadastral, DP-005.
+**Refinamento (Issue #16):** o modelo conceitual, a matriz de campos e finalidades, a comparação pessoa física x jurídica, a relação entre identidade autenticada e associado, os critérios de deduplicação e o pacote de decisão estão em [`../product/member-model-refinement.md`](../product/member-model-refinement.md). Nenhuma migration de associado foi criada nessa etapa, e as recomendações do documento **não** são requisitos aprovados.
+
+**Bloqueadores antes da implementação:**
+
+- **DP-008** — quais dados pessoais coletar e com qual finalidade (decomposto em D1–D8 e D15 no refinamento);
+- **DP-013** — representação de pessoa jurídica na categoria Contribuinte; decisão estruturalmente bloqueante;
+- **DP-014** — obrigatoriedade da categoria estatutária na criação do vínculo, dependente de DP-006A;
+- **DP-005** — apenas na parcela que delimita P2-02 x P2-04.
+
+**Delimitação recomendada:** a P2-02 não cria coluna de situação cadastral. Estados, transições e histórico do ciclo associativo permanecem na P2-04, que deve preceder qualquer funcionalidade dependente de vínculo vigente.
 
 ### P2-03 — Pesquisa e filtros
 Paginação e filtros necessários à operação real.

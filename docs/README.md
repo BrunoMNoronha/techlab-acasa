@@ -20,6 +20,7 @@ Este diretório é a fonte oficial da documentação do projeto, em conjunto com
 - [`product/business-rules.md`](product/business-rules.md) — regras de negócio conhecidas e seu status de validação.
 - [`product/membership-model.md`](product/membership-model.md) — categorias estatutárias, ciclo do vínculo e normalização recomendada da situação cadastral.
 - [`product/association-intake.md`](product/association-intake.md) — baseline do processo de inscrição pública e decisões ainda necessárias.
+- [`product/member-model-refinement.md`](product/member-model-refinement.md) — refinamento do modelo mínimo de associado (P2-02): matriz de campos e finalidades, pessoa física x jurídica, identidade/deduplicação e pacote de decisão.
 
 ### Arquitetura
 - [`architecture/decision-log.md`](architecture/decision-log.md) — decisões arquiteturais, recomendações e pendências.
