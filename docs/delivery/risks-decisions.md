@@ -11,16 +11,27 @@
 | DP-007 | Desenvolvimento tradicional x OutSystems | desenvolvimento tradicional; OutSystems descartado nesta implementação |
 | DA-STACK | Stack/arquitetura inicial | definida no ADR-0001: monólito modular Next.js/TypeScript + Supabase + Vercel |
 
+## Decisões resolvidas em 2026-09-03
+
+O responsável pelo produto aprovou o pacote de decisão do refinamento da P2-02 (`../product/member-model-refinement.md`, §0), destravando o **incremento 1** — o schema mínimo da entidade `Associado` (Issue #20).
+
+| ID | Decisão | Resultado |
+|---|---|---|
+| DP-013 | Como representar pessoa jurídica na categoria Contribuinte | **entidade única** `public.members` com `person_type` restrito a `PF`/`PJ`; sem tabelas separadas e sem adiar a capacidade de representar PJ (D9) |
+| DP-014 | A categoria estatutária é obrigatória desde a criação do vínculo? | **sim**, obrigatória em todo registro persistido, por chave estrangeira `not null` para `membership_categories(code)`, `on update cascade` e `on delete restrict`. Nenhuma categoria genérica foi criada (D10) |
+| DP-008 | Quais dados pessoais coletar no **cadastro administrativo mínimo** e com qual finalidade | resolvida **apenas para a P2-02**: coletar `name` (obrigatório), `email` e `phone` (opcionais). **Não** coletar CPF, CNPJ, RG, filiação, naturalidade, profissão, formação, foto, contato de emergência, observações livres, endereços, data de nascimento, número de registro legado nem data de admissão (D1–D8, D15, D17). **Permanece aberta para a inscrição pública (P2-08)**, que tem requisitos próprios |
+| DP-005 | Parcela que delimita P2-02 x P2-04 | resolvida por delimitação: a P2-02 **não** cria coluna de situação cadastral nem histórico do vínculo. **Permanece aberta** quanto à normalização dos estados, que é escopo da P2-04 (D12) |
+
+Decisões técnicas correlatas registradas na mesma revisão, dentro da regra de escalonamento: identificador técnico `uuid` opaco e imutável (D14), mecânica da chave estrangeira da categoria (D11) e desacoplamento entre `members` e `auth.users` (D13).
+
 ## Decisões prioritárias ainda abertas
 
 | ID | Decisão | Por que importa | Bloqueia |
 |---|---|---|---|
-| DP-005 | Confirmar a normalização operacional da situação cadastral e fluxo de recurso/readmissão | o Estatuto define eventos do vínculo, mas não enumera estados de sistema | situação cadastral |
-| DP-006A | Existem cadastros de associados a migrar? | histórico de pagamentos não será migrado, mas outros dados ainda não foram inventariados | plano de migração de cadastro |
-| DP-008 | Quais campos/documentos são obrigatórios na inscrição pública e qual a finalidade de cada dado? | define formulário, LGPD, validações e storage | implementação do ingresso **e o cadastro administrativo da P2-02**; decomposta campo a campo em `../product/member-model-refinement.md` |
-| DP-013 | Como representar pessoa jurídica na categoria Contribuinte, e existe hoje algum associado PJ? | o Art. 12 admite Contribuinte pessoa jurídica; a resposta determina se o modelo é uma entidade com tipo de pessoa, duas entidades ou apenas pessoa física | **estruturalmente bloqueia a P2-02**; alternativas comparadas em `../product/member-model-refinement.md`, §6 |
-| DP-014 | A categoria estatutária é obrigatória desde a criação do vínculo? | todo associado atual pode não ter categoria conhecida, e a resposta define se a coluna pode ser `not null` | modelagem da P2-02; depende de DP-006A |
-| DP-015 | Qual o recorte mínimo de autorização administrativa para o cadastro de associados, e quem o opera na ACASA? | sem modelo de permissão (P2-05), um CRUD de associados só poderia liberar acesso a toda conta autenticada ou a ninguém; `authenticated` não tem privilégio e `service_role` é proibida na aplicação | entrega utilizável da P2-02; alternativas em `../product/member-model-refinement.md`, §2 |
+| DP-005 | Confirmar a normalização operacional da situação cadastral e fluxo de recurso/readmissão | o Estatuto define eventos do vínculo, mas não enumera estados de sistema | situação cadastral (P2-04). **Não bloqueia mais o schema da P2-02** |
+| DP-006A | Existem cadastros de associados a migrar? | histórico de pagamentos não será migrado, mas outros dados ainda não foram inventariados | plano de migração de cadastro. **Não bloqueia mais a obrigatoriedade da categoria**: se houver cadastro legado sem categoria conhecida, a importação deve resolver a inconsistência antes da persistência definitiva ou usar staging próprio, em vez de enfraquecer a integridade do domínio |
+| DP-008 | Quais campos/documentos são obrigatórios na **inscrição pública** e qual a finalidade de cada dado? | define formulário, LGPD, validações e storage | implementação do ingresso (P2-08/P2-09). **Resolvida para o cadastro administrativo mínimo da P2-02**; decomposta campo a campo em `../product/member-model-refinement.md` |
+| DP-015 | Qual o recorte mínimo de autorização administrativa para o cadastro de associados, e quem o opera na ACASA? | sem modelo de permissão (P2-05), um CRUD de associados só poderia liberar acesso a toda conta autenticada ou a ninguém; `authenticated` não tem privilégio e `service_role` é proibida na aplicação | **entrega utilizável da P2-02**: CRUD, telas e Server Actions de associado. O schema já existe e nasce sem acesso de runtime. Alternativas em `../product/member-model-refinement.md`, §2 |
 | DP-009 | Quais são os estados da solicitação de associação e quais perfis operacionalizam a análise/aprovação? | o Estatuto atribui à Diretoria competência para admitir/demitir; falta detalhar o workflow de sistema | implementação do ingresso |
 | DP-010 | Quais regras reais de cobrança, competência, vencimento e adimplência? | define modelo financeiro e indicadores | financeiro |
 | DP-011 | Quais estados e motivos de análise de comprovante serão usados? | define workflow e auditoria | comprovantes |
