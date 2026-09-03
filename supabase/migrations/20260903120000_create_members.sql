@@ -15,7 +15,8 @@
 --   D10/DP-014 categoria estatutária obrigatória;
 --   D12/DP-005 nenhuma coluna de situação cadastral (permanece na P2-04);
 --   D13        nenhum vínculo com auth.users;
---   D14        chave primária uuid opaca e imutável.
+--   D14        chave primária uuid opaca e imutável, com a imutabilidade
+--              garantida por trigger, já que a PK sozinha só impede duplicidade.
 
 create table public.members (
   id uuid primary key default gen_random_uuid(),
@@ -90,6 +91,34 @@ create trigger members_set_updated_at
   before update on public.members
   for each row
   execute function public.set_updated_at();
+
+-- A chave primária garante unicidade, não imutabilidade: um UPDATE sobre id
+-- seria aceito e quebraria silenciosamente qualquer referência futura (rotas,
+-- relacionamentos, auditoria). D14 exige um identificador imutável, então a
+-- garantia é dada no próprio banco.
+create or replace function public.members_reject_id_change()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  if new.id is distinct from old.id then
+    raise exception 'the member identifier is immutable'
+      using errcode = 'restrict_violation';
+  end if;
+
+  return new;
+end;
+$$;
+
+comment on function public.members_reject_id_change() is
+  'Impede a alteração do identificador técnico de um associado.';
+
+create trigger members_reject_id_change
+  before update of id on public.members
+  for each row
+  execute function public.members_reject_id_change();
 
 alter table public.members enable row level security;
 

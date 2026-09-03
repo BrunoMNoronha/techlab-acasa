@@ -298,6 +298,7 @@ As respostas abaixo destravam a implementação da P2-02:
 
 - `public.members` por migration versionada, com `id` `uuid`, `person_type` restrito a `PF`/`PJ`, `name` obrigatório e não em branco, `membership_category_code` obrigatório com chave estrangeira para o catálogo estatutário (`on update cascade`, `on delete restrict`), `email` e `phone` opcionais e `created_at`/`updated_at` mantidos pelo banco;
 - RLS habilitado **sem policy**, privilégios revogados de `anon` e `authenticated`;
-- suíte pgTAP ampliada para cobrir estrutura, constraints, comportamento da chave estrangeira, timestamps e postura de acesso.
+- imutabilidade do identificador garantida por trigger, já que a chave primária impede duplicidade e não alteração;
+- suíte pgTAP ampliada para cobrir estrutura, constraints, comportamento da chave estrangeira, timestamps, imutabilidade do identificador e postura de acesso.
 
 Continuam **não** implementados: CRUD, telas, listagens, pesquisa, Server Actions, APIs, perfis, roles, matriz de permissões, policies permissivas, situação cadastral, histórico associativo, solicitação pública, documentos, uploads, dashboard, financeiro e multi-tenancy. As perguntas de §12 que continuam sem resposta são a **11** (DP-015, quem opera o cadastro) e a **10** (DP-006A, cadastro legado a importar); as perguntas **2**, **5**, **6**, **7**, **8**, **9** e **12** permanecem relevantes para fases posteriores (P2-04, P2-08 e domínio de serviço/taxas), mas não bloqueiam o incremento seguinte.

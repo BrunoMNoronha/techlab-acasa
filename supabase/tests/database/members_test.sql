@@ -9,7 +9,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(44);
+select plan(47);
 
 -- ---------------------------------------------------------------------------
 -- Estrutura
@@ -318,6 +318,36 @@ select is(
   (select updated_at from public.members where name = 'Associado Ficticio Renomeado'),
   (select created_at from public.members where name = 'Associado Ficticio Renomeado'),
   'updated_at is refreshed to the current transaction time on update'
+);
+
+-- ---------------------------------------------------------------------------
+-- Imutabilidade do identificador técnico
+--
+-- A chave primária impede duplicidade, não alteração. Sem o trigger, um UPDATE
+-- sobre id seria aceito e quebraria silenciosamente qualquer referência futura.
+-- ---------------------------------------------------------------------------
+
+select has_trigger(
+  'public',
+  'members',
+  'members_reject_id_change',
+  'members guards the technical identifier with a database trigger'
+);
+
+select throws_ok(
+  $$ update public.members
+     set id = '00000000-0000-4000-8000-000000000000'
+     where name = 'Associado Ficticio Renomeado' $$,
+  '23001',
+  null,
+  'changing the technical identifier is rejected (D14)'
+);
+
+select lives_ok(
+  $$ update public.members
+     set id = id
+     where name = 'Associado Ficticio Renomeado' $$,
+  'an update that leaves the identifier untouched is accepted'
 );
 
 -- ---------------------------------------------------------------------------

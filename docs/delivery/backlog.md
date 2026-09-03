@@ -140,12 +140,13 @@ Inclui o **vínculo entre associado e categoria estatutária**, desmembrado da P
 - `membership_category_code` obrigatório, com chave estrangeira para `membership_categories(code)`, `on update cascade` e `on delete restrict`, mais índice de apoio;
 - `email` e `phone` opcionais, sem unicidade e sem exigência de canal de contato; o banco apenas impede valor em branco quando o campo é informado;
 - `created_at` e `updated_at` mantidos pelo banco, com trigger que sobrescreve qualquer `updated_at` enviado pelo cliente; `created_at` **não** representa data de admissão associativa;
+- identificador técnico imutável: a chave primária impede duplicidade, não alteração, então um trigger rejeita qualquer `UPDATE` sobre `id`, protegendo referências e auditoria futuras;
 - RLS habilitado **sem policy** e privilégios revogados de `anon` e `authenticated` — negação por padrão, coerente com a P2-01; a aplicação continua sem `service_role`;
 - nenhum dado pessoal além de nome, e-mail e telefone foi criado: sem CPF, CNPJ, RG, filiação, naturalidade, profissão, formação, foto, contato de emergência, observações livres, endereços, data de nascimento, número de registro legado ou data de admissão;
 - nenhuma coluna de situação cadastral e nenhum vínculo com `auth.users`;
-- testes pgTAP ampliados de 12 para 56, sendo 44 novos para `members` (estrutura, constraints, comportamento da chave estrangeira, timestamps e postura de acesso) e os 12 de categorias preservados; o teste de `on delete restrict` usa fixture transacional e não altera o catálogo estatutário.
+- testes pgTAP ampliados de 12 para 59, sendo 47 novos para `members` (estrutura, constraints, comportamento da chave estrangeira, timestamps, imutabilidade do identificador e postura de acesso) e os 12 de categorias preservados; o teste de `on delete restrict` usa fixture transacional e não altera o catálogo estatutário.
 
-**Evidência:** Issue #20 e PR #21; CI validou aplicação e banco local, com reset completo a partir das migrations e 56/56 testes pgTAP aprovados. Nenhum ambiente remoto foi criado ou alterado.
+**Evidência:** Issue #20 e PR #21; CI validou aplicação e banco local, com reset completo a partir das migrations e 59/59 testes pgTAP aprovados. Nenhum ambiente remoto foi criado ou alterado.
 
 #### Incremento 2 — pendente
 
