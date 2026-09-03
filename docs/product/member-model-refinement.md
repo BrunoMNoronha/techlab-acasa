@@ -42,6 +42,22 @@ Nenhuma **RECOMENDAÇÃO** deste documento deve ser lida como regra aprovada. Re
 
 **RECOMENDAÇÃO:** a P2-02 deve entregar o **cadastro consolidado** de quem já é associado. Ela não deve introduzir workflow, estados nem entidade de solicitação.
 
+### Dependência de autorização entre P2-02 e P2-05
+
+Há uma dependência real de sequenciamento que precisa ser decidida antes de a P2-02 começar. Hoje, a identidade autenticada expõe apenas `{ userId }` (P1-04), não existe modelo de permissão (P2-05), `authenticated` não possui privilégio algum sobre tabelas de negócio e a aplicação não pode usar `service_role`. Nesse estado, uma P2-02 que entregue cadastro, edição e consulta só teria dois desfechos possíveis, ambos inaceitáveis: conceder acesso administrativo a **toda** conta autenticada, ou não permitir acesso a **ninguém**.
+
+Alternativas:
+
+| Alternativa | Consequência |
+|---|---|
+| **A. P2-02 apenas de schema/domínio** | entrega a entidade, o vínculo com a categoria, as constraints e os testes de integridade, sem interface administrativa; nenhuma decisão de autorização é antecipada, mas o valor visível para a ACASA é adiado |
+| **B. Antecipar o mínimo de P2-05 para dentro da P2-02** | inclui na P2-02 apenas o suficiente para distinguir "administrador" de "demais usuários", com validação server-side; entrega CRUD utilizável, ao custo de decidir um recorte de permissão antes da matriz completa |
+| **C. Mover a P2-05 inteira para antes da P2-02** | mais seguro em termos de autorização, mas a matriz de permissões depende de decisões de produto ainda abertas e da existência das operações a permissionar |
+
+**RECOMENDAÇÃO:** alternativa **B**, com o menor recorte possível — um único papel administrativo validado no servidor, sem matriz de capacidades — porque a alternativa C exige decidir permissões sobre operações que ainda não existem e a alternativa A adia indefinidamente o valor.
+
+**DECISÃO PENDENTE.** O recorte concreto de autorização depende de quem, na ACASA, opera o cadastro, e isso pertence à P2-05. Em nenhuma hipótese a P2-02 deve conceder privilégio amplo a `authenticated` nem introduzir `service_role` na aplicação para contornar a ausência do modelo de permissões.
+
 ## 3. Modelo conceitual mínimo de Associado
 
 Proposta conceitual. **Nenhum schema é criado nesta tarefa.**
@@ -157,10 +173,12 @@ Um associado recém-cadastrado é, de fato, um associado com vínculo vigente. H
 
 | Abordagem | Como funciona | Efeito sobre o histórico |
 |---|---|---|
-| **A. Ausência de estado significa vínculo vigente** | a P2-02 não cria coluna de situação; a P2-04 introduz a tabela de eventos do vínculo e, na mesma migration, registra o evento de admissão para os associados já cadastrados, usando a data de criação como referência | histórico íntegro; nenhum estado precisa ser reescrito |
+| **A. Ausência de estado significa vínculo vigente** | a P2-02 não cria coluna de situação; a P2-04 introduz a tabela de eventos do vínculo e registra o evento de admissão para os associados já cadastrados | histórico íntegro; nenhum estado precisa ser reescrito |
 | **B. Coluna de situação restrita a `ATIVO`** | a P2-02 cria a coluna já limitada a `ATIVO`; a P2-04 amplia o domínio e introduz o histórico | funciona, mas cria um estado sem o evento que o originou, e a P2-04 terá de retroceder e sintetizar a admissão |
 
 **RECOMENDAÇÃO:** abordagem **A**. O que confere valor ao vínculo não é o rótulo do estado, mas o **evento** (admissão pela Diretoria, desligamento, exclusão, readmissão) com motivo, data e responsável — exatamente o escopo da P2-04, dependente de DP-005. Criar a coluna antes significa afirmar no schema um domínio que a ACASA ainda não confirmou.
+
+**Atenção à data de admissão no backfill.** `created_at` registra quando a linha entrou no novo sistema, **não** quando a Diretoria admitiu o associado. Usar `created_at` como data de admissão fabricaria histórico associativo e poderia produzir tempo de vínculo e resultado de auditoria incorretos. Portanto, ao registrar retroativamente o evento de admissão, a P2-04 deve preservar a **data de admissão de origem** quando houver evidência documental (ficha, ata, planilha) e marcá-la explicitamente como **desconhecida** quando não houver — nunca substituí-la pela data de criação do registro. Se a ACASA confirmar que precisa dessa data, ela é um campo de negócio e deve ser coletada já na P2-02 (ver §4, "Data de preenchimento").
 
 **Consequência aceita:** entre a P2-02 e a P2-04 o sistema não distingue associado desligado de associado com vínculo vigente. Isso é adequado enquanto o cadastro for apenas administrativo e não houver operação que dependa da distinção. **A P2-04 deve preceder qualquer funcionalidade que dependa de vínculo vigente** — cobrança, portal do associado ou apuração de quórum.
 
@@ -217,6 +235,8 @@ Um associado recém-cadastrado é, de fato, um associado com vínculo vigente. H
 | **D13** — Vínculo com `auth.users` | **desacoplado**: sem conta por associado, sem `profiles`; coluna nula acrescentada quando o portal entrar em escopo | P1-04 não criou perfil; `enable_signup = false` | o portal exigirá uma migration futura, de baixo custo | criar `auth_user_id` desde já | Não — decisão técnica reversível |
 | **D14** — Identificador técnico | `uuid` opaco e imutável; **CPF nunca como chave** | RNF-006; risco de PII em URL e log | nenhum relevante | número de registro legado como chave | Não — decisão técnica |
 | **D15** — Número de registro legado | adotar apenas se houver uso operacional real; nunca como chave técnica | ficha legada | pode estar duplicado ou ausente no papel | não adotar | **Sim** |
+| **D16** — Autorização do cadastro: P2-02 x P2-05 | antecipar para a P2-02 o **menor recorte** de autorização administrativa, validado no servidor (§2, alternativa B) | P1-04 expõe só `{ userId }`; `authenticated` sem privilégio; `service_role` proibida na aplicação | decide um recorte de permissão antes da matriz completa da P2-05 | P2-02 apenas de schema (A); ou P2-05 completa antes (C) | **Sim** — depende de quem opera o cadastro na ACASA |
+| **D17** — Data de admissão no backfill | preservar a data de origem quando houver evidência documental; marcar como desconhecida quando não houver; **nunca** usar `created_at` como data de admissão | `created_at` registra a entrada no sistema, não o ato da Diretoria | exige campo próprio e possível dado ausente | derivar da data de criação do registro (fabrica histórico) | **Sim** — a ACASA precisa dizer se essa data é necessária |
 
 ## 12. Perguntas objetivas para a ACASA
 
@@ -232,7 +252,9 @@ As respostas abaixo destravam a implementação da P2-02:
 8. Há necessidade real de **observações livres** no cadastro? Em caso afirmativo, quem pode lê-las? *(D5)*
 9. A normalização `ATIVO` / `DESLIGADO_VOLUNTARIAMENTE` / `EXCLUIDO_EX_OFFICIO` está confirmada? *(DP-005, para a P2-04)*
 10. Existem cadastros de associados em papel ou planilha a importar? *(DP-006A; afeta D10 e D1)*
+11. Quem, na ACASA, opera o cadastro de associados — um único responsável ou vários papéis distintos? *(D16, define o recorte mínimo de autorização)*
+12. A **data de admissão** de cada associado precisa ser registrada, e existe evidência documental dela? *(D17)*
 
 ## 13. Compromisso de escopo desta etapa
 
-Nenhuma migration de associado, entidade, CRUD, tela, API, estado cadastral, perfil, auditoria de runtime ou solicitação pública foi criada nesta tarefa. A implementação da P2-02 depende das respostas de §12, em especial **D9**, **D1** e **D10**.
+Nenhuma migration de associado, entidade, CRUD, tela, API, estado cadastral, perfil, auditoria de runtime ou solicitação pública foi criada nesta tarefa. A implementação da P2-02 depende das respostas de §12, em especial **D9**, **D1**, **D10** e **D16**.

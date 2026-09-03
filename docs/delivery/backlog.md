@@ -132,7 +132,8 @@ Inclui o **vínculo entre associado e categoria estatutária**, desmembrado da P
 - **DP-008** — quais dados pessoais coletar e com qual finalidade (decomposto em D1–D8 e D15 no refinamento);
 - **DP-013** — representação de pessoa jurídica na categoria Contribuinte; decisão estruturalmente bloqueante;
 - **DP-014** — obrigatoriedade da categoria estatutária na criação do vínculo, dependente de DP-006A;
-- **DP-005** — apenas na parcela que delimita P2-02 x P2-04.
+- **DP-005** — apenas na parcela que delimita P2-02 x P2-04;
+- **DP-015** — recorte de autorização: sem modelo de permissão (P2-05), um CRUD de associados só poderia liberar acesso a toda conta autenticada ou a ninguém. Ver `member-model-refinement.md`, §2.
 
 **Delimitação recomendada:** a P2-02 não cria coluna de situação cadastral. Estados, transições e histórico do ciclo associativo permanecem na P2-04, que deve preceder qualquer funcionalidade dependente de vínculo vigente.
 
