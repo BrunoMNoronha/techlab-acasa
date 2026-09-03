@@ -17,7 +17,10 @@
 |---|---|---|---|
 | DP-005 | Confirmar a normalização operacional da situação cadastral e fluxo de recurso/readmissão | o Estatuto define eventos do vínculo, mas não enumera estados de sistema | situação cadastral |
 | DP-006A | Existem cadastros de associados a migrar? | histórico de pagamentos não será migrado, mas outros dados ainda não foram inventariados | plano de migração de cadastro |
-| DP-008 | Quais campos/documentos são obrigatórios na inscrição pública e qual a finalidade de cada dado? | define formulário, LGPD, validações e storage | implementação do ingresso |
+| DP-008 | Quais campos/documentos são obrigatórios na inscrição pública e qual a finalidade de cada dado? | define formulário, LGPD, validações e storage | implementação do ingresso **e o cadastro administrativo da P2-02**; decomposta campo a campo em `../product/member-model-refinement.md` |
+| DP-013 | Como representar pessoa jurídica na categoria Contribuinte, e existe hoje algum associado PJ? | o Art. 12 admite Contribuinte pessoa jurídica; a resposta determina se o modelo é uma entidade com tipo de pessoa, duas entidades ou apenas pessoa física | **estruturalmente bloqueia a P2-02**; alternativas comparadas em `../product/member-model-refinement.md`, §6 |
+| DP-014 | A categoria estatutária é obrigatória desde a criação do vínculo? | todo associado atual pode não ter categoria conhecida, e a resposta define se a coluna pode ser `not null` | modelagem da P2-02; depende de DP-006A |
+| DP-015 | Qual o recorte mínimo de autorização administrativa para o cadastro de associados, e quem o opera na ACASA? | sem modelo de permissão (P2-05), um CRUD de associados só poderia liberar acesso a toda conta autenticada ou a ninguém; `authenticated` não tem privilégio e `service_role` é proibida na aplicação | entrega utilizável da P2-02; alternativas em `../product/member-model-refinement.md`, §2 |
 | DP-009 | Quais são os estados da solicitação de associação e quais perfis operacionalizam a análise/aprovação? | o Estatuto atribui à Diretoria competência para admitir/demitir; falta detalhar o workflow de sistema | implementação do ingresso |
 | DP-010 | Quais regras reais de cobrança, competência, vencimento e adimplência? | define modelo financeiro e indicadores | financeiro |
 | DP-011 | Quais estados e motivos de análise de comprovante serão usados? | define workflow e auditoria | comprovantes |
@@ -48,6 +51,8 @@ O Regimento usa **inadimplente** no contexto financeiro/operacional das taxas re
 A ficha atual contém registro, data de nascimento, nome completo, CPF, RG, filiação, naturalidade, endereço residencial, endereço na comunidade, profissão, formação, telefone, e-mail, contato de emergência, observações administrativas, assinaturas, data de preenchimento e foto 3x4.
 
 Esses campos são referência do processo existente, não lista automática de campos obrigatórios do novo sistema. Finalidade e minimização devem ser avaliadas antes de implementação.
+
+A avaliação campo a campo — com finalidade candidata, necessidade, risco LGPD e recomendação — está em [`../product/member-model-refinement.md`](../product/member-model-refinement.md), §4. Nenhuma recomendação daquele documento aprova coleta de dado pessoal: as perguntas que exigem resposta da ACASA estão consolidadas em sua §12.
 
 ### Controle atual de pagamentos
 

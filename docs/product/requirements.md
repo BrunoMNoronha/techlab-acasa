@@ -84,6 +84,8 @@ A ficha cadastral atual da ACASA contém campos para registro, data de nasciment
 
 Esses campos são **evidência do processo atual**, não uma aprovação automática para coleta no novo sistema. Antes de tornar qualquer dado obrigatório, especialmente documentos de identificação, filiação, foto e contato de emergência, deve ser registrada sua finalidade e necessidade.
 
+A análise campo a campo — finalidade candidata, necessidade, obrigatoriedade, risco LGPD e recomendação — está em [`member-model-refinement.md`](member-model-refinement.md). Esse documento é **refinamento**: suas recomendações não constituem requisito aprovado, e as decisões que exigem manifestação da ACASA estão listadas ali e refletidas em `../delivery/risks-decisions.md`.
+
 ## Migração
 
 - histórico do controle atual de pagamentos: **não migrar**;
@@ -96,8 +98,9 @@ Antes de implementar os requisitos afetados, devem ser resolvidas as decisões s
 
 1. critérios operacionais de enquadramento nas categorias estatutárias, especialmente Benemérito e Contribuinte;
 2. confirmação da normalização operacional dos estados `ATIVO`, `DESLIGADO_VOLUNTARIAMENTE` e `EXCLUIDO_EX_OFFICIO`, além do fluxo de recurso/readmissão;
-3. campos/documentos obrigatórios no ingresso e finalidade de cada dado;
-4. estados do processo de solicitação e perfis operacionais responsáveis pela análise/aprovação;
-5. regras de cobrança, competência, vencimento e definição de adimplência;
-6. necessidade de migração de cadastros não financeiros;
-7. sistema operacional predominante do ambiente local, apenas para ajustar instruções operacionais caso necessário.
+3. campos/documentos obrigatórios no ingresso e finalidade de cada dado (decomposto em decisões objetivas em `member-model-refinement.md`);
+4. representação de pessoa jurídica na categoria Contribuinte, que condiciona estruturalmente o modelo de associado;
+5. estados do processo de solicitação e perfis operacionais responsáveis pela análise/aprovação;
+6. regras de cobrança, competência, vencimento e definição de adimplência;
+7. necessidade de migração de cadastros não financeiros;
+8. sistema operacional predominante do ambiente local, apenas para ajustar instruções operacionais caso necessário.
