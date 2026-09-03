@@ -107,14 +107,25 @@ Este backlog organiza trabalho, mas **não transforma itens pendentes em requisi
 
 ## Fase 2 — Administração e ingresso de associados
 
-### P2-01 — Categorias estatutárias
-- disponibilizar Fundadores, Beneméritos e Contribuintes;
-- vincular categoria ao associado;
-- impedir alteração cotidiana sem autorização/governança apropriada;
-- auditar mudanças quando houver alteração normativa futura.
+### P2-01 — Categorias estatutárias — CONCLUÍDO (catálogo e governança)
+- catálogo `public.membership_categories` com exatamente Fundador, Benemérito e Contribuinte, carregados por migration versionada (criada na P1-03) e confirmados nesta etapa;
+- tabela de referência com código estável como chave primária, sem enum rígido, preservando a possibilidade de alteração estatutária futura;
+- alteração cotidiana impedida: nenhum CRUD, endpoint, Server Action ou tela de manutenção; `anon` e `authenticated` sem privilégio; RLS habilitado sem policy (negação por padrão); a aplicação nunca usa `service_role`;
+- governança de alteração normativa documentada em `../product/membership-model.md`: base normativa → issue → migration → testes pgTAP → documentação → PR → CI verde;
+- trilha de auditoria dessas mudanças é o histórico do repositório (migration, issue, PR e revisão), adequada a um catálogo não editável em runtime; auditoria de operações administrativas de runtime permanece na P2-06;
+- testes pgTAP ampliados de 8 para 12, cobrindo a rejeição efetiva de código fora do formato, nome em branco, nome duplicado e nome nulo, além das verificações estruturais e de acesso já existentes;
+- nenhuma mudança de schema foi necessária e nenhuma entidade `Associado` foi antecipada.
+
+**Desmembramento:** o item original "vincular categoria ao associado" foi atribuído à **P2-02**, por depender da entidade `Associado`. RF-005 permanece válido e **não** está totalmente entregue; RF-006 está entregue. Ver a rastreabilidade em `../product/requirements.md`.
+
+**Evidência:** Issue #14 e PR #15; CI validou aplicação e banco local, com 12/12 testes pgTAP aprovados. Nenhum ambiente remoto foi criado ou alterado.
 
 ### P2-02 — Associados
 Cadastro, edição, consulta e validações.
+
+Inclui o **vínculo entre associado e categoria estatutária**, desmembrado da P2-01: a referência ao catálogo `membership_categories` deve ser criada junto da entidade `Associado`, com teste cobrindo a integridade do vínculo. Somente com essa entrega o RF-005 poderá ser considerado completo na parte de categoria.
+
+Depende das decisões DP-008 (campos e finalidade dos dados pessoais) e, para a situação cadastral, DP-005.
 
 ### P2-03 — Pesquisa e filtros
 Paginação e filtros necessários à operação real.
@@ -125,8 +136,12 @@ Implementar estados/transições apenas conforme `membership-model.md` e decisã
 ### P2-05 — Perfis e permissões
 Matriz mínima de administração com validação server-side e respeito à competência estatutária da Diretoria para admissão/demissão de sócios.
 
+Trata das permissões de **operação administrativa**. O catálogo de categorias estatutárias permanece fora de qualquer perfil de edição cotidiana, conforme a governança definida na P2-01.
+
 ### P2-06 — Auditoria administrativa
 Registrar operações críticas definidas para o módulo.
+
+Cobre auditoria de operações administrativas **em runtime**. Alterações do catálogo estatutário não entram aqui: por não serem editáveis em runtime, sua trilha é o histórico do repositório (P2-01).
 
 ### P2-07 — Dashboard administrativo inicial
 Somente indicadores derivados das capacidades já implementadas e validadas.

@@ -4,7 +4,7 @@ Sistema web para centralizar a gestão administrativa da ACASA e o relacionament
 
 ## Estado atual
 
-O projeto possui a arquitetura do MVP definida, a fundação executável da aplicação, a fundação local/versionada do banco de dados, a base de autenticação/autorização com Supabase Auth (login, logout, recuperação de acesso e rota protegida validada no servidor) e a fundação de observabilidade e configuração por ambiente (logger estruturado, captura central de erros do servidor, páginas de erro genéricas e política de segredos). Funcionalidades de negócio continuam sendo implementadas somente a partir dos requisitos e decisões versionados em `docs/`.
+O projeto possui a arquitetura do MVP definida, a fundação executável da aplicação, a fundação local/versionada do banco de dados, a base de autenticação/autorização com Supabase Auth (login, logout, recuperação de acesso e rota protegida validada no servidor), a fundação de observabilidade e configuração por ambiente (logger estruturado, captura central de erros do servidor, páginas de erro genéricas e política de segredos) e o catálogo de categorias estatutárias com governança de alteração normativa. Funcionalidades de negócio continuam sendo implementadas somente a partir dos requisitos e decisões versionados em `docs/`.
 
 ## Stack do MVP
 
@@ -188,4 +188,4 @@ Documentos prioritários:
 
 ## Próximos passos
 
-Com a Fase 1 (fundação técnica) concluída, a próxima etapa é a Fase 2 — administração e ingresso de associados — começando pelas categorias estatutárias (P2-01). Perfis/permissões administrativas (P2-05) e a inscrição pública (P2-08/P2-09) dependem de decisões ainda registradas como pendentes. Os ambientes Preview/Production ainda não existem e sua criação exige tarefa específica e decisão de custo. Entidades e campos de negócio só devem ser adicionados quando suas regras estiverem suficientemente definidas.
+Com a Fase 1 (fundação técnica) concluída e o catálogo de categorias estatutárias formalizado (P2-01), a próxima etapa é o cadastro de associados (P2-02), que inclui o vínculo entre associado e categoria estatutária. Perfis/permissões administrativas (P2-05) e a inscrição pública (P2-08/P2-09) dependem de decisões ainda registradas como pendentes. Os ambientes Preview/Production ainda não existem e sua criação exige tarefa específica e decisão de custo. Entidades e campos de negócio só devem ser adicionados quando suas regras estiverem suficientemente definidas.
