@@ -1,9 +1,44 @@
 # Refinamento do modelo mínimo de Associado (P2-02)
 
-- **Status do documento:** REFINAMENTO — não constitui aprovação de requisito.
-- **Issue:** #16
+- **Status do documento:** REFINAMENTO — não constitui aprovação de requisito, **exceto** pelas decisões consolidadas na [§0](#0-decisões-aprovadas-pelo-responsável-pelo-produto-2026-09-03), que foram formalmente aprovadas.
+- **Issues:** #16 (refinamento) e #20 (implementação do incremento 1).
 - **Escopo:** decompor as decisões que bloqueiam a P2-02, especialmente **DP-008** (campos/documentos e finalidade dos dados pessoais) e a parcela de **DP-005** necessária para separar P2-02 de P2-04.
-- **Fora de escopo:** entidade `Associado`, migrations, CRUD, telas, APIs, situação cadastral, perfis, auditoria de runtime e solicitação pública.
+- **Fora de escopo:** CRUD, telas, APIs, situação cadastral, perfis, auditoria de runtime e solicitação pública.
+
+## 0. Decisões aprovadas pelo responsável pelo produto (2026-09-03)
+
+O pacote de decisão da [§11](#11-pacote-de-decisão) foi submetido ao responsável pelo produto, que **aprovou** as decisões abaixo para o recorte da P2-02. A partir desta revisão elas deixam de ser **RECOMENDAÇÃO** e passam a ser **DECISÃO APROVADA**; o restante do documento é preservado como registro da análise que as fundamentou.
+
+| Decisão | Resultado aprovado para a P2-02 |
+|---|---|
+| **D1 / DP-008** | **não** armazenar CPF nem CNPJ neste incremento; nunca usá-los como chave técnica. Poderão ser acrescentados por migration futura se uma finalidade real for demonstrada |
+| **D2** | não coletar RG, filiação, naturalidade, profissão nem formação |
+| **D3** | não coletar foto |
+| **D4** | não coletar contato de emergência |
+| **D5** | não criar campo livre de observações |
+| **D6** | `email` e `phone` **opcionais**; nenhum canal obrigatório, nenhuma unicidade, e-mail não é identificador técnico. O banco apenas impede valor em branco quando o campo é informado; validação de formato pertence à aplicação, quando o CRUD existir |
+| **D7** | não armazenar endereços. O endereço na Comunidade Aldeia pertence ao domínio de serviço/taxas e será refinado na fase correspondente |
+| **D8** | não armazenar data de nascimento |
+| **D9 / DP-013** | **entidade única** `public.members` com `person_type` restrito a `PF` e `PJ`. Sem tabelas separadas e sem adiar a capacidade estrutural de representar pessoa jurídica |
+| **D10 / DP-014** | categoria estatutária **obrigatória** em todo registro persistido, por chave estrangeira `not null` para `membership_categories(code)`. Nenhuma categoria genérica (`SEM_CATEGORIA`, `INDEFINIDO`, `OUTRO`) é criada |
+| **D12 / DP-005** | **não** criar situação cadastral, data de desligamento, motivo, recurso, readmissão ou histórico de situação. Nada de `ATIVO` como default. Toda essa modelagem permanece na P2-04 |
+| **D13** | `members` permanece **desacoplada** de `auth.users`: sem `auth_user_id`, sem `profiles`, sem conta automática e sem trigger de Auth |
+| **D14** | chave primária `uuid` opaca e imutável, gerada pelo banco |
+| **D15** | não armazenar número de registro legado |
+| **D17** | não criar `admission_date` na P2-02. `created_at` significa apenas quando o registro foi persistido no sistema e **não** pode ser tratado como data de admissão associativa; o ato de admissão e o histórico associativo ficam na P2-04 |
+
+D11 (mecânica da chave estrangeira) e D16 (sequenciamento de autorização) não dependiam de aprovação de produto: D11 foi implementada como decisão técnica e D16 foi resolvida por sequenciamento — este incremento adota a **alternativa A** (P2-02 apenas de schema/domínio), deixando o recorte de autorização para o incremento seguinte.
+
+### Pendências que permanecem abertas
+
+- **DP-015** continua aberta e **bloqueia** CRUD, telas, Server Actions e qualquer exposição em runtime. Nenhum acesso foi concedido a `authenticated`, nenhum perfil provisório foi criado e a aplicação continua sem `service_role`.
+- **DP-006A** continua aberta **apenas** quanto à existência de cadastro legado a importar. Ela deixou de bloquear a obrigatoriedade da categoria: se cadastros sem categoria conhecida forem confirmados, a importação deverá resolver a inconsistência antes da persistência definitiva ou usar um processo de staging próprio, em vez de enfraquecer a integridade do domínio principal.
+- **DP-008** deixa de bloquear o **cadastro mínimo administrativo** da P2-02, mas permanece aberta para a **solicitação pública** (P2-08), que tem requisitos próprios de campos, documentos e finalidade.
+- **DP-005** continua aberta para a **P2-04**, mas não bloqueia mais o schema da P2-02.
+
+### O que foi implementado sob estas decisões
+
+A migration `supabase/migrations/20260903120000_create_members.sql` cria `public.members` conforme a §0 e nada além disso. A P2-02 permanece **EM ANDAMENTO**: o cadastro ainda não é operável, porque não existe CRUD administrativo.
 
 ## Convenção de classificação usada neste documento
 
@@ -255,6 +290,15 @@ As respostas abaixo destravam a implementação da P2-02:
 11. Quem, na ACASA, opera o cadastro de associados — um único responsável ou vários papéis distintos? *(D16, define o recorte mínimo de autorização)*
 12. A **data de admissão** de cada associado precisa ser registrada, e existe evidência documental dela? *(D17)*
 
-## 13. Compromisso de escopo desta etapa
+## 13. Compromisso de escopo
 
-Nenhuma migration de associado, entidade, CRUD, tela, API, estado cadastral, perfil, auditoria de runtime ou solicitação pública foi criada nesta tarefa. A implementação da P2-02 depende das respostas de §12, em especial **D9**, **D1**, **D10** e **D16**.
+**Etapa de refinamento (Issue #16).** Nenhuma migration de associado, entidade, CRUD, tela, API, estado cadastral, perfil, auditoria de runtime ou solicitação pública foi criada naquela tarefa.
+
+**Incremento 1 da implementação (Issue #20).** Com as decisões da §0 aprovadas, foi criada exclusivamente a entidade de domínio:
+
+- `public.members` por migration versionada, com `id` `uuid`, `person_type` restrito a `PF`/`PJ`, `name` obrigatório e não em branco, `membership_category_code` obrigatório com chave estrangeira para o catálogo estatutário (`on update cascade`, `on delete restrict`), `email` e `phone` opcionais e `created_at`/`updated_at` mantidos pelo banco;
+- RLS habilitado **sem policy**, privilégios revogados de `anon` e `authenticated`;
+- imutabilidade do identificador garantida por trigger, já que a chave primária impede duplicidade e não alteração;
+- suíte pgTAP ampliada para cobrir estrutura, constraints, comportamento da chave estrangeira, timestamps, imutabilidade do identificador e postura de acesso.
+
+Continuam **não** implementados: CRUD, telas, listagens, pesquisa, Server Actions, APIs, perfis, roles, matriz de permissões, policies permissivas, situação cadastral, histórico associativo, solicitação pública, documentos, uploads, dashboard, financeiro e multi-tenancy. As perguntas de §12 que continuam sem resposta são a **11** (DP-015, quem opera o cadastro) e a **10** (DP-006A, cadastro legado a importar); as perguntas **2**, **5**, **6**, **7**, **8**, **9** e **12** permanecem relevantes para fases posteriores (P2-04, P2-08 e domínio de serviço/taxas), mas não bloqueiam o incremento seguinte.

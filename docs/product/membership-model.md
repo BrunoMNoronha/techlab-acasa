@@ -143,10 +143,11 @@ A Diretoria é o órgão estatutariamente competente para admitir/demitir sócio
 
 ## Decisões ainda abertas
 
-O refinamento da P2-02 em [`member-model-refinement.md`](member-model-refinement.md) decompõe parte destas decisões em alternativas comparadas e perguntas objetivas para a ACASA. As recomendações registradas ali **não** aprovam nenhuma das decisões abaixo.
+O refinamento da P2-02 em [`member-model-refinement.md`](member-model-refinement.md) decompõe parte destas decisões em alternativas comparadas e perguntas objetivas para a ACASA. Salvo as que a §0 daquele documento registra como **aprovadas**, as recomendações ali registradas **não** aprovam nenhuma das decisões abaixo.
+
+**Resolvida em 2026-09-03:** como registrar pessoa jurídica quando classificada como Contribuinte — entidade única `public.members` com tipo de pessoa (`PF`/`PJ`), conforme `member-model-refinement.md`, §0 (D9/DP-013).
 
 - critérios práticos de enquadramento inicial em cada categoria;
-- como registrar pessoa jurídica quando classificada como Contribuinte (alternativas comparadas em `member-model-refinement.md`, §6; decisão estruturalmente bloqueante para a P2-02);
 - campos obrigatórios do ingresso por categoria;
 - estados detalhados da solicitação pública;
 - tratamento operacional do recurso contra exclusão;

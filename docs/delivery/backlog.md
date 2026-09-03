@@ -122,22 +122,41 @@ Este backlog organiza trabalho, mas **não transforma itens pendentes em requisi
 
 **Evidência:** Issue #14 e PR #15; CI validou aplicação e banco local, com 12/12 testes pgTAP aprovados. Nenhum ambiente remoto foi criado ou alterado.
 
-### P2-02 — Associados — BLOQUEADA POR DECISÃO DE PRODUTO (refinamento concluído)
+### P2-02 — Associados — EM ANDAMENTO (incremento 1 concluído: schema mínimo)
 Cadastro, edição, consulta e validações.
 
-Inclui o **vínculo entre associado e categoria estatutária**, desmembrado da P2-01: a referência ao catálogo `membership_categories` deve ser criada junto da entidade `Associado`, com teste cobrindo a integridade do vínculo. Somente com essa entrega o RF-005 poderá ser considerado completo na parte de categoria.
+Inclui o **vínculo entre associado e categoria estatutária**, desmembrado da P2-01: a referência ao catálogo `membership_categories` foi criada junto da entidade `Associado`, com testes cobrindo a integridade do vínculo.
 
-**Refinamento (Issue #16):** o modelo conceitual, a matriz de campos e finalidades, a comparação pessoa física x jurídica, a relação entre identidade autenticada e associado, os critérios de deduplicação e o pacote de decisão estão em [`../product/member-model-refinement.md`](../product/member-model-refinement.md). Nenhuma migration de associado foi criada nessa etapa, e as recomendações do documento **não** são requisitos aprovados.
+**Refinamento (Issue #16):** o modelo conceitual, a matriz de campos e finalidades, a comparação pessoa física x jurídica, a relação entre identidade autenticada e associado, os critérios de deduplicação e o pacote de decisão estão em [`../product/member-model-refinement.md`](../product/member-model-refinement.md). Nenhuma migration de associado foi criada nessa etapa, e as recomendações do documento **não** eram requisitos aprovados.
 
-**Bloqueadores antes da implementação:**
+**Decisões aprovadas (2026-09-03):** o responsável pelo produto aprovou o pacote de decisão para o recorte da P2-02, consolidado em [`../product/member-model-refinement.md`](../product/member-model-refinement.md), §0, e registrado em [`risks-decisions.md`](risks-decisions.md). Isso resolveu **DP-013**, **DP-014**, a parcela de **DP-008** relativa ao cadastro administrativo mínimo e a parcela de **DP-005** que delimita P2-02 x P2-04.
 
-- **DP-008** — quais dados pessoais coletar e com qual finalidade (decomposto em D1–D8 e D15 no refinamento);
-- **DP-013** — representação de pessoa jurídica na categoria Contribuinte; decisão estruturalmente bloqueante;
-- **DP-014** — obrigatoriedade da categoria estatutária na criação do vínculo, dependente de DP-006A;
-- **DP-005** — apenas na parcela que delimita P2-02 x P2-04;
+#### Incremento 1 — schema mínimo de associados (Issue #20) — CONCLUÍDO
+
+- `public.members` criada por migration versionada e incremental, sem alterar migrations já aplicadas;
+- entidade **única** com `person_type` restrito a `PF` e `PJ`, atendendo ao Art. 12 sem tabelas separadas nem chave estrangeira polimórfica;
+- chave primária `uuid` opaca e imutável, gerada pelo banco; nenhum dado pessoal é usado como chave;
+- `name` obrigatório, rejeitando valor vazio ou apenas com espaços; nenhuma unicidade por nome e nenhuma deduplicação automática;
+- `membership_category_code` obrigatório, com chave estrangeira para `membership_categories(code)`, `on update cascade` e `on delete restrict`, mais índice de apoio;
+- `email` e `phone` opcionais, sem unicidade e sem exigência de canal de contato; o banco apenas impede valor em branco quando o campo é informado;
+- `created_at` e `updated_at` mantidos pelo banco, com trigger que sobrescreve qualquer `updated_at` enviado pelo cliente; `created_at` **não** representa data de admissão associativa;
+- identificador técnico imutável: a chave primária impede duplicidade, não alteração, então um trigger rejeita qualquer `UPDATE` sobre `id`, protegendo referências e auditoria futuras;
+- RLS habilitado **sem policy** e privilégios revogados de `anon` e `authenticated` — negação por padrão, coerente com a P2-01; a aplicação continua sem `service_role`;
+- nenhum dado pessoal além de nome, e-mail e telefone foi criado: sem CPF, CNPJ, RG, filiação, naturalidade, profissão, formação, foto, contato de emergência, observações livres, endereços, data de nascimento, número de registro legado ou data de admissão;
+- nenhuma coluna de situação cadastral e nenhum vínculo com `auth.users`;
+- testes pgTAP ampliados de 12 para 59, sendo 47 novos para `members` (estrutura, constraints, comportamento da chave estrangeira, timestamps, imutabilidade do identificador e postura de acesso) e os 12 de categorias preservados; o teste de `on delete restrict` usa fixture transacional e não altera o catálogo estatutário.
+
+**Evidência:** Issue #20 e PR #21; CI validou aplicação e banco local, com reset completo a partir das migrations e 59/59 testes pgTAP aprovados. Nenhum ambiente remoto foi criado ou alterado.
+
+#### Incremento 2 — pendente
+
+**Bloqueador remanescente:**
+
 - **DP-015** — recorte de autorização: sem modelo de permissão (P2-05), um CRUD de associados só poderia liberar acesso a toda conta autenticada ou a ninguém. Ver `member-model-refinement.md`, §2.
 
-**Delimitação recomendada:** a P2-02 não cria coluna de situação cadastral. Estados, transições e histórico do ciclo associativo permanecem na P2-04, que deve preceder qualquer funcionalidade dependente de vínculo vigente.
+Enquanto DP-015 não for decidida, permanecem fora de entrega: CRUD administrativo, telas, listagens, formulários, Server Actions, APIs de associado e qualquer policy RLS permissiva. **A P2-02 não pode ser declarada concluída antes disso.**
+
+**Delimitação mantida:** a P2-02 não cria coluna de situação cadastral. Estados, transições e histórico do ciclo associativo permanecem na P2-04, que deve preceder qualquer funcionalidade dependente de vínculo vigente.
 
 ### P2-03 — Pesquisa e filtros
 Paginação e filtros necessários à operação real.

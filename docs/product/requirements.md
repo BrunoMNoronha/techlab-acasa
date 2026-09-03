@@ -15,7 +15,7 @@
 | RF-002 | Restringir funcionalidades conforme perfil/permissões do usuário. | BASELINE |
 | RF-003 | Permitir cadastrar, editar, consultar, pesquisar e filtrar associados. | BASELINE |
 | RF-004 | Permitir encerrar e reativar/readmitir vínculo sem perda indevida de histórico, conforme regras aprovadas. | BASELINE; transições normativas parcialmente confirmadas |
-| RF-005 | Permitir associar categoria estatutária e acompanhar situação cadastral separadamente da financeira. | APROVADO para categorias; **PARCIALMENTE ENTREGUE** — catálogo referenciável existe (P2-01); o vínculo categoria↔associado depende da P2-02. Normalização de estados cadastrais documentada em `membership-model.md` |
+| RF-005 | Permitir associar categoria estatutária e acompanhar situação cadastral separadamente da financeira. | APROVADO para categorias; **PARCIALMENTE ENTREGUE** — catálogo referenciável (P2-01) e vínculo obrigatório e íntegro entre associado e categoria no banco (P2-02, incremento 1); ainda **não** existe operação administrativa para atribuir ou alterar a categoria, bloqueada por DP-015. Normalização de estados cadastrais documentada em `membership-model.md` |
 | RF-006 | Disponibilizar as categorias estatutárias Fundadores, Beneméritos e Contribuintes, impedindo alteração cotidiana sem autorização/governança adequada. | APROVADO pelo Estatuto 2025; **ENTREGUE** pela P2-01 |
 | RF-007 | Registrar histórico mínimo de operações administrativas relevantes. | BASELINE |
 | RF-008 | Permitir cadastrar e consultar cobranças. | APROVADO; regras de geração/competência PENDENTES |
@@ -73,10 +73,11 @@ Ver `membership-model.md` para critérios normativos, modelagem da situação ca
 | Parcela do requisito | Entrega | Situação |
 |---|---|---|
 | Catálogo com as três categorias estatutárias, imutável em runtime e com governança de alteração normativa | P2-01 | entregue |
-| Vínculo entre associado e categoria estatutária | P2-02, junto da criação da entidade `Associado` | pendente |
+| Integridade estrutural do vínculo entre associado e categoria estatutária | P2-02, incremento 1: `public.members` referencia `membership_categories(code)` por chave estrangeira obrigatória, com `on update cascade`, `on delete restrict` e testes pgTAP de rejeição | entregue |
+| Operação administrativa para atribuir e alterar a categoria de um associado | P2-02, incremento seguinte; depende de DP-015 | pendente |
 | Acompanhamento da situação cadastral, separada da financeira | P2-04, após a decisão DP-005 | pendente |
 
-RF-005 **não** deve ser considerado totalmente entregue enquanto o vínculo categoria↔associado não existir e não estiver testado. A separação acima é uma divisão técnica de entrega e não altera o requisito de negócio.
+RF-005 **não** deve ser considerado totalmente entregue enquanto não existir operação administrativa de enquadramento e o acompanhamento da situação cadastral. O que o incremento 1 da P2-02 entrega é a **integridade estrutural** do vínculo no banco — um associado não pode existir sem categoria válida —, e não uma funcionalidade de interface. A separação acima é uma divisão técnica de entrega e não altera o requisito de negócio.
 
 ### Evidência do cadastro atual
 
