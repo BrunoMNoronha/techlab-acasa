@@ -6,6 +6,7 @@ import { hasPasswordRecoveryProof } from "@/lib/auth/identity";
 import { authMessages } from "@/lib/auth/messages";
 import { LOGIN_PATH } from "@/lib/auth/routes";
 import { isValidPassword, readFormString } from "@/lib/auth/validation";
+import { logger } from "@/lib/observability/logger";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function updatePassword(
@@ -51,6 +52,9 @@ function describePasswordUpdateError(code: string | undefined): string {
     case "weak_password":
       return authMessages.passwordTooShort;
     default:
+      // Falha inesperada (não é validação comum): registrar só o código estável.
+      logger.warn("auth.password_update_failed", { errorCode: code });
+
       return authMessages.passwordUpdateFailed;
   }
 }

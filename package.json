@@ -16,7 +16,8 @@
     "db:stop": "supabase stop --no-backup",
     "db:reset": "supabase db reset",
     "db:lint": "supabase db lint --level error",
-    "db:test": "supabase test db"
+    "db:test": "supabase test db",
+    "check:secrets": "node scripts/check-secret-markers.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.5",

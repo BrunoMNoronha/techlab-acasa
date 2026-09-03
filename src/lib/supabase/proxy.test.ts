@@ -9,7 +9,14 @@ type CookieAdapter = {
 };
 
 const getClaims = vi.fn();
+const { warn } = vi.hoisted(() => ({ warn: vi.fn() }));
 let refreshedCookies: CookieToSet[] = [];
+
+vi.mock("@/lib/observability/logger", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/observability/logger")>();
+
+  return { ...actual, logger: { info: vi.fn(), warn, error: vi.fn() } };
+});
 
 vi.mock("@supabase/ssr", () => ({
   createServerClient: (_url: string, _key: string, options: { cookies: CookieAdapter }) => ({
@@ -44,6 +51,7 @@ describe("updateSession", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
     getClaims.mockReset();
+    warn.mockClear();
   });
 
   it("redireciona anônimo que tenta acessar rota protegida para o login", async () => {
@@ -105,9 +113,17 @@ describe("updateSession", () => {
     getClaims.mockResolvedValueOnce({ data: null, error: { message: "invalid" } });
     const withError = await updateSession(makeRequest("/area-restrita"));
     expect(withError.status).toBe(307);
+    // Sessão inválida é fluxo normal: sem log.
+    expect(warn).not.toHaveBeenCalled();
 
-    getClaims.mockRejectedValueOnce(new Error("network"));
-    const withException = await updateSession(makeRequest("/area-restrita"));
+    getClaims.mockRejectedValueOnce(new TypeError("fetch failed"));
+    const withException = await updateSession(makeRequest("/area-restrita", "sb-token=abc"));
     expect(withException.status).toBe(307);
+    // Exceção técnica: registrada apenas com nome do erro e contexto, sem cookies.
+    expect(warn).toHaveBeenCalledWith(
+      "auth.session_check_failed",
+      expect.objectContaining({ errorName: "TypeError", routeType: "proxy" }),
+    );
+    expect(JSON.stringify(warn.mock.calls)).not.toContain("sb-token");
   });
 });

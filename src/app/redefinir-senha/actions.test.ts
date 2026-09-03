@@ -6,9 +6,14 @@ import { authMessages } from "@/lib/auth/messages";
 const getClaims = vi.fn();
 const updateUser = vi.fn();
 const signOut = vi.fn(async () => ({ error: null }));
+const { warn } = vi.hoisted(() => ({ warn: vi.fn() }));
 const redirect = vi.fn((path: string) => {
   throw new Error(`REDIRECT:${path}`);
 });
+
+vi.mock("@/lib/observability/logger", () => ({
+  logger: { info: vi.fn(), warn, error: vi.fn() },
+}));
 
 vi.mock("@/lib/supabase/server", () => ({
   createSupabaseServerClient: async () => ({ auth: { getClaims, updateUser, signOut } }),
@@ -81,13 +86,21 @@ describe("updatePassword", () => {
       status: "error",
       message: authMessages.passwordSameAsCurrent,
     });
+    // Validação esperada: não gera ruído operacional.
+    expect(warn).not.toHaveBeenCalled();
 
-    updateUser.mockResolvedValueOnce({ error: { code: "unexpected_failure" } });
+    updateUser.mockResolvedValueOnce({
+      error: { code: "unexpected_failure", message: "internal: senha-longa-1" },
+    });
 
     expect(await updatePassword(initialAuthFormState, formDataOf("senha-longa-1"))).toEqual({
       status: "error",
       message: authMessages.passwordUpdateFailed,
     });
+    expect(warn).toHaveBeenCalledWith("auth.password_update_failed", {
+      errorCode: "unexpected_failure",
+    });
+    expect(JSON.stringify(warn.mock.calls)).not.toContain("senha-longa-1");
   });
 
   it("atualiza a senha, encerra a sessão de recuperação e redireciona ao login", async () => {

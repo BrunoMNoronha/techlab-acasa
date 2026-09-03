@@ -4,7 +4,7 @@ Sistema web para centralizar a gestão administrativa da ACASA e o relacionament
 
 ## Estado atual
 
-O projeto possui a arquitetura do MVP definida, a fundação executável da aplicação, a fundação local/versionada do banco de dados e a base de autenticação/autorização com Supabase Auth (login, logout, recuperação de acesso e rota protegida validada no servidor). Funcionalidades de negócio continuam sendo implementadas somente a partir dos requisitos e decisões versionados em `docs/`.
+O projeto possui a arquitetura do MVP definida, a fundação executável da aplicação, a fundação local/versionada do banco de dados, a base de autenticação/autorização com Supabase Auth (login, logout, recuperação de acesso e rota protegida validada no servidor) e a fundação de observabilidade e configuração por ambiente (logger estruturado, captura central de erros do servidor, páginas de erro genéricas e política de segredos). Funcionalidades de negócio continuam sendo implementadas somente a partir dos requisitos e decisões versionados em `docs/`.
 
 ## Stack do MVP
 
@@ -93,6 +93,15 @@ Nenhuma chave secreta/`service_role` é usada pela aplicação. Copie `.env.exam
 npx supabase status
 ```
 
+`NEXT_PUBLIC_*` é incorporado ao bundle do navegador no build: nunca use esse prefixo para segredos. A matriz de configuração por ambiente (local, preview, production), a política de logs e o procedimento em caso de vazamento de segredo estão em [`docs/operations/environments-observability.md`](docs/operations/environments-observability.md).
+
+## Observabilidade
+
+- logs server-side estruturados (JSON por linha em stdout/stderr) via `src/lib/observability/logger.ts`, com allow-list de campos — nunca registre request, headers, cookies, tokens, e-mails ou senhas;
+- erros inesperados do servidor são capturados por `src/instrumentation.ts` (`onRequestError`) e registrados com template da rota, tipo de rota, nome do erro e `digest`;
+- `src/app/error.tsx` e `src/app/global-error.tsx` exibem mensagem genérica com opção de tentar novamente;
+- nenhum provedor externo de logs/APM está integrado; o logger é o ponto único para isso no futuro.
+
 ### Rotas
 
 | Rota | Função |
@@ -127,11 +136,14 @@ Como não há cadastro público, crie usuários de teste administrativamente no 
 Execute antes de publicar alterações:
 
 ```bash
+npm run check:secrets
 npm run lint
 npm run typecheck
 npm test
 npm run build
 ```
+
+`check:secrets` varre os arquivos rastreados pelo Git em busca de marcadores de segredo (sem imprimir valores) e também roda na CI.
 
 Quando houver mudança de banco, execute também:
 
@@ -143,7 +155,7 @@ npm run db:test
 npm run db:stop
 ```
 
-O pipeline de CI executa as verificações da aplicação em Node 24 e valida migrations/testes de banco em uma stack Supabase local isolada.
+O pipeline de CI executa a verificação de marcadores de segredo e as verificações da aplicação em Node 24, e valida migrations/testes de banco em uma stack Supabase local isolada.
 
 ## Princípios
 
@@ -168,6 +180,7 @@ Documentos prioritários:
 - [Decisões arquiteturais](docs/architecture/decision-log.md)
 - [ADR da stack do MVP](docs/architecture/adr/0001-stack-mvp.md)
 - [Segurança e privacidade](docs/security/security-privacy.md)
+- [Ambientes, configuração e observabilidade](docs/operations/environments-observability.md)
 - [Backlog por fases](docs/delivery/backlog.md)
 - [Riscos e decisões pendentes](docs/delivery/risks-decisions.md)
 - [Definition of Done e critérios do MVP](docs/delivery/definition-of-done.md)
@@ -175,4 +188,4 @@ Documentos prioritários:
 
 ## Próximos passos
 
-Com a base de autenticação estabelecida, a próxima etapa técnica é observabilidade e gestão de segredos por ambiente (P1-05). Perfis/permissões administrativas (P2-05) e a inscrição pública (P2-08/P2-09) dependem de decisões ainda registradas como pendentes. Entidades e campos de negócio só devem ser adicionados quando suas regras estiverem suficientemente definidas.
+Com a Fase 1 (fundação técnica) concluída, a próxima etapa é a Fase 2 — administração e ingresso de associados — começando pelas categorias estatutárias (P2-01). Perfis/permissões administrativas (P2-05) e a inscrição pública (P2-08/P2-09) dependem de decisões ainda registradas como pendentes. Os ambientes Preview/Production ainda não existem e sua criação exige tarefa específica e decisão de custo. Entidades e campos de negócio só devem ser adicionados quando suas regras estiverem suficientemente definidas.

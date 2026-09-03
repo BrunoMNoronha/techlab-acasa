@@ -7,7 +7,7 @@ describe("getSupabasePublicConfig", () => {
     vi.unstubAllEnvs();
   });
 
-  it("retorna URL e chave publicável quando configuradas", () => {
+  it("retorna somente URL e chave publicável quando configuradas", () => {
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://127.0.0.1:54321");
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_teste");
 
@@ -21,6 +21,71 @@ describe("getSupabasePublicConfig", () => {
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "");
 
-    expect(() => getSupabasePublicConfig()).toThrow(/NEXT_PUBLIC_SUPABASE_URL/);
+    expect(() => getSupabasePublicConfig()).toThrow(/NEXT_PUBLIC_SUPABASE_URL não está definida/);
+  });
+
+  it("falha quando somente a chave está ausente", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://127.0.0.1:54321");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "");
+
+    expect(() => getSupabasePublicConfig()).toThrow(
+      /NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY não está definida/,
+    );
+  });
+
+  it("rejeita URL que não é http(s) sem ecoar o valor recebido", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "postgres://usuario:senha-secreta@host/db");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_teste");
+
+    expect(() => getSupabasePublicConfig()).toThrow(/não é uma URL http\(s\) válida/);
+    expect(() => getSupabasePublicConfig()).not.toThrow(/senha-secreta/);
+  });
+
+  it("rejeita chave secreta na variável pública sem ecoar o valor recebido", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://127.0.0.1:54321");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_secret_nao_vazar");
+
+    let message = "";
+    try {
+      getSupabasePublicConfig();
+    } catch (error) {
+      message = error instanceof Error ? error.message : String(error);
+    }
+
+    expect(message).toMatch(/contém uma chave secreta/);
+    expect(message).not.toContain("nao_vazar");
+  });
+
+  it("rejeita JWT legado de service_role sem ecoar o valor recebido", () => {
+    const payload = Buffer.from(
+      JSON.stringify({ iss: "supabase", role: "service_role", exp: 1983812996 }),
+    ).toString("base64url");
+    const legacyServiceRoleJwt = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${payload}.assinatura-que-nao-deve-vazar`;
+
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://127.0.0.1:54321");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", legacyServiceRoleJwt);
+
+    let message = "";
+    try {
+      getSupabasePublicConfig();
+    } catch (error) {
+      message = error instanceof Error ? error.message : String(error);
+    }
+
+    expect(message).toMatch(/service_role/);
+    expect(message).not.toContain("assinatura-que-nao-deve-vazar");
+    expect(message).not.toContain(payload);
+  });
+
+  it("aceita chave legada anon, que é pública por desenho", () => {
+    const payload = Buffer.from(
+      JSON.stringify({ iss: "supabase", role: "anon", exp: 1983812996 }),
+    ).toString("base64url");
+    const legacyAnonJwt = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${payload}.assinatura`;
+
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://127.0.0.1:54321");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", legacyAnonJwt);
+
+    expect(getSupabasePublicConfig().publishableKey).toBe(legacyAnonJwt);
   });
 });
