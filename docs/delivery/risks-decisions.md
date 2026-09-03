@@ -24,7 +24,7 @@
 | DP-009 | Quais são os estados da solicitação de associação e quais perfis operacionalizam a análise/aprovação? | o Estatuto atribui à Diretoria competência para admitir/demitir; falta detalhar o workflow de sistema | implementação do ingresso |
 | DP-010 | Quais regras reais de cobrança, competência, vencimento e adimplência? | define modelo financeiro e indicadores | financeiro |
 | DP-011 | Quais estados e motivos de análise de comprovante serão usados? | define workflow e auditoria | comprovantes |
-| DP-012 | Qual sistema operacional predomina no desenvolvimento local? | ajusta scripts/instruções; não bloqueia stack | apenas documentação operacional |
+| DP-012 | Qual sistema operacional predomina no desenvolvimento local? | ajusta scripts/instruções; não bloqueia stack | apenas documentação operacional. **Impacto reduzido** na Issue #18: o repositório passou a normalizar fim de linha para LF via `.gitattributes`, com verificação `npm run check:eol` local e na CI, de modo que migrations, scripts e workflows não dependem mais do sistema operacional de quem contribui. A decisão permanece aberta somente para eventuais instruções operacionais específicas. |
 
 ## Evidências recebidas
 
@@ -87,7 +87,7 @@ Na revisão de 2026-09-02, o conteúdo tabular do arquivo anexado não ficou ace
 | R-009 | Falta de trilha de auditoria em ações críticas | Média | Alto | definir eventos auditáveis por módulo, incluindo exclusão/readmissão |
 | R-010 | Migração de cadastro descoberta tarde ou com dados de baixa qualidade | Média | Alto | inventariar apenas dados não financeiros que realmente precisem ser migrados |
 | R-011 | Dependência forte de fornecedor sem análise | Média | Médio/Alto | manter núcleo em PostgreSQL, isolar integrações e revisar custos antes de produção |
-| R-012 | Build/testes/documentação divergirem do produto | Média | Alto | Definition of Done, CI e revisão de diff |
+| R-012 | Build/testes/documentação divergirem do produto | Média | Alto | Definition of Done, CI e revisão de diff; normalização de fim de linha versionada e verificada na CI (Issue #18) para que o resultado não dependa do sistema operacional local |
 | R-013 | Backups existirem sem teste de restauração | Baixa/Média | Alto | validar restauração antes de operação crítica |
 | R-014 | Acessibilidade ser tratada apenas no fim | Média | Médio | padrões acessíveis desde componentes e testes de jornadas |
 | R-015 | Formulário público ser alvo de spam, upload malicioso ou abuso | Média | Alto | validação server-side, limites de upload, rate limiting/anti-abuso proporcional e logs |

@@ -40,7 +40,9 @@ Este backlog organiza trabalho, mas **não transforma itens pendentes em requisi
 ### P0-06 — Definir restrições técnicas e ambiente — SUFICIENTE PARA A STACK
 **Confirmado:** desenvolvimento tradicional.
 
-**Pendente não bloqueador:** sistema operacional predominante para ajustar documentação operacional.
+**Pendente não bloqueador:** sistema operacional predominante para ajustar documentação operacional (DP-012).
+
+**Neutralidade de ambiente (Issue #18):** o repositório normaliza fim de linha para LF pelo `.gitattributes` e verifica essa normalização com `npm run check:eol`, local e na CI. Migrations SQL, scripts e workflows passam a ser idênticos em qualquer sistema operacional, preservando a garantia de que `npm run db:reset` reproduz o banco do zero. Nenhuma regra de negócio foi afetada.
 
 ## Fase 1 — Fundação técnica
 
