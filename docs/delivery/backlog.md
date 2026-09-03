@@ -96,7 +96,7 @@ Este backlog organiza trabalho, mas **não transforma itens pendentes em requisi
 - `src/instrumentation.ts` com `onRequestError` encaminhando erros do servidor ao logger com template da rota, tipo de rota, método, nome do erro e `digest` — sem headers, cookies, path concreto ou query string;
 - `error.tsx` e `global-error.tsx` genéricos, acessíveis e com retry, sem detalhes técnicos;
 - logger aplicado somente a falhas técnicas do Auth (recuperação, logout, atualização de senha, exceção no Proxy); fluxos esperados (senha inválida, anônimo em rota protegida, validações) não geram log;
-- `getSupabasePublicConfig()` valida URL http(s), chave presente e recusa `sb_secret_` em variável pública, sem ecoar valores;
+- `getSupabasePublicConfig()` valida URL http(s), chave presente e recusa em variável pública tanto `sb_secret_` quanto JWT legado de `service_role`, sem ecoar valores;
 - matriz de configuração Local/Preview/Production, distinção público x secreto, política de logs, campos proibidos, investigação de erro e procedimento de incidente de segredo em `docs/operations/environments-observability.md`; valores de Preview/Production marcados como inexistentes;
 - `.env*` reais ignorados (validado com `git check-ignore`), `.env.example` só com placeholders, `npm run check:secrets` (script sem terceiros) executado na CI;
 - GitHub secret scanning e push protection confirmados ativos via API (0 alertas), com limitações registradas; nenhum recurso pago contratado;

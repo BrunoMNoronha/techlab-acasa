@@ -19,11 +19,9 @@ const PATTERNS = [
   { name: "Token Vercel/Supabase CLI", regex: /\bsbp_[a-f0-9]{30,}\b/ },
 ];
 
-const IGNORED_FILES = new Set(["package-lock.json"]);
-
 const trackedFiles = execFileSync("git", ["ls-files", "-z"], { encoding: "utf8" })
   .split("\0")
-  .filter((file) => file.length > 0 && !IGNORED_FILES.has(file));
+  .filter((file) => file.length > 0);
 
 const findings = [];
 

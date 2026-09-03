@@ -35,7 +35,7 @@ Regras:
 - `NEXT_PUBLIC_*` é destinado ao navegador. O Next.js **incorpora o valor ao bundle JavaScript durante `next build`** (somente acessos literais `process.env.NEXT_PUBLIC_X`). Depois do build o valor está congelado e é visível a qualquer pessoa que abra o site.
 - **Nunca** coloque segredo com prefixo `NEXT_PUBLIC_`.
 - A chave publicável do Supabase (`sb_publishable_...`) **não é segredo**: foi desenhada para o navegador; a proteção de dados vem de autorização server-side e RLS.
-- Chaves `sb_secret_...` e a `service_role` **jamais** devem usar `NEXT_PUBLIC_`, chegar ao navegador ou ser versionadas. `getSupabasePublicConfig()` recusa explicitamente uma chave `sb_secret_` na variável pública.
+- Chaves `sb_secret_...` e a `service_role` **jamais** devem usar `NEXT_PUBLIC_`, chegar ao navegador ou ser versionadas. `getSupabasePublicConfig()` recusa uma chave `sb_secret_` e também um JWT legado cujo papel seja `service_role` (projetos antigos distribuem `anon`/`service_role` nesse formato). A chave legada `anon` continua aceita, por ser pública por desenho.
 - Variáveis sem o prefixo ficam disponíveis apenas no servidor (Node.js), lidas em tempo de execução em renderização dinâmica.
 
 ## Configuração local
@@ -58,7 +58,8 @@ git check-ignore -v .env.local .env.production.local
 
 - a URL não está definida ou não é `http(s)`;
 - a chave não está definida;
-- a chave começa com `sb_secret_`.
+- a chave começa com `sb_secret_`;
+- a chave é um JWT legado com papel `service_role`.
 
 As mensagens nomeiam a variável e o problema, mas **nunca ecoam o valor recebido**, pois podem terminar em logs, terminal da CI ou relatórios.
 
@@ -141,7 +142,7 @@ Camadas, todas obrigatórias:
 
 1. `.gitignore` ignora `.env*` (exceto `.env.example`).
 2. `.env.example` somente com placeholders; revisão de PR verifica o diff.
-3. `npm run check:secrets` (`scripts/check-secret-markers.mjs`), executado na CI: varre os arquivos rastreados por marcadores (`sb_secret_...`, JWT, chave PEM, tokens GitHub/Supabase CLI) e falha sem imprimir valores. Padrões exigem comprimento mínimo para não acusar menções documentais.
+3. `npm run check:secrets` (`scripts/check-secret-markers.mjs`), executado na CI: varre **todos** os arquivos rastreados pelo Git, incluindo `package-lock.json`, por marcadores (`sb_secret_...`, JWT, chave PEM, tokens GitHub/Supabase CLI) e falha sem imprimir valores. Padrões exigem comprimento mínimo para não acusar menções documentais.
 4. GitHub secret scanning e push protection (ver abaixo).
 5. `getSupabasePublicConfig()` recusa chave secreta em variável pública.
 
