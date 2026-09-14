@@ -122,7 +122,7 @@ Este backlog organiza trabalho, mas **não transforma itens pendentes em requisi
 
 **Evidência:** Issue #14 e PR #15; CI validou aplicação e banco local, com 12/12 testes pgTAP aprovados. Nenhum ambiente remoto foi criado ou alterado.
 
-### P2-02 — Associados — EM ANDAMENTO (incremento 1 concluído: schema mínimo)
+### P2-02 — Associados — EM ANDAMENTO (schema e fundação de autorização concluídos)
 Cadastro, edição, consulta e validações.
 
 Inclui o **vínculo entre associado e categoria estatutária**, desmembrado da P2-01: a referência ao catálogo `membership_categories` foi criada junto da entidade `Associado`, com testes cobrindo a integridade do vínculo.
@@ -150,19 +150,24 @@ Inclui o **vínculo entre associado e categoria estatutária**, desmembrado da P
 
 #### Refinamento de autorização — Issue #22
 
-[Especificação técnica e pacote de decisão](../security/admin-authorization-refinement.md): DT-015A define concessão específica por UUID, guard server-side e RLS; **DP-015B permanece pendente** de quem pode receber acesso e quem aprova concessões/revogações. Não houve implementação de autorização ou CRUD.
+[Especificação técnica e pacote de decisão](../security/admin-authorization-refinement.md): DT-015A define concessão específica por UUID, guard server-side e RLS; **DP-015B permanece pendente** de quem pode receber acesso e quem aprova concessões/revogações. O refinamento não implementou autorização ou CRUD.
 
-#### Incremento 2 — fundação mínima de autorização local, a implementar
+#### Incremento 2 — fundação mínima de autorização local (Issue #24) — CONCLUÍDO
 
-Em tarefa própria: tabela de concessão, predicado, guard e procedimento operacional com fixtures fictícias e testes negativos. Preservar `members` e `membership_categories` fechadas. Não exige escolher pessoas reais; não encerra DP-015B.
+- `public.member_administrators` mínima, ligada a `auth.users(id)` por UUID e protegida por RLS/ACL de leitura própria;
+- `public.can_manage_members()` sem parâmetro de identidade, `SECURITY INVOKER` e EXECUTE somente para `authenticated`;
+- guard server-only `requireMemberAdministration()` reutiliza identidade verificada, consulta o estado corrente a cada chamada e falha fechado;
+- procedimento PostgreSQL local parametrizado, sem endpoint/tela ou usuário real;
+- 44 novos testes pgTAP preservam os 59 existentes, mais integração com Auth real, JWT assinado, chave publicável e Data API;
+- `members` e `membership_categories` permanecem fechadas; nenhum CRUD foi criado e DP-015B não foi encerrada.
 
 #### Incremento seguinte — cadastro administrativo, pendente
 
 **Bloqueador remanescente:**
 
-- **DP-015B** — destinatários e autoridade organizacional de concessão/revogação ainda não definidos. DT-015A está especificada, mas a fundação ainda precisa ser implementada e validada antes do cadastro. Ver [refinamento de autorização](../security/admin-authorization-refinement.md).
+- **DP-015B** — destinatários e autoridade organizacional de concessão/revogação ainda não definidos. A fundação DT-015A está implementada e validada, mas não responde essa decisão. Ver [refinamento de autorização](../security/admin-authorization-refinement.md).
 
-Enquanto DP-015B não for decidida ou a fundação não estiver validada, permanecem fora de entrega: CRUD administrativo, telas, listagens, formulários, Server Actions, APIs de associado e qualquer policy que libere dados de `members` ou do catálogo. **A P2-02 não pode ser declarada concluída antes disso.**
+Enquanto DP-015B não for decidida, permanecem fora de entrega: CRUD administrativo, telas, listagens, formulários, Server Actions, APIs de associado e qualquer policy que libere dados de `members` ou do catálogo. **A P2-02 não pode ser declarada concluída antes disso.**
 
 **Delimitação mantida:** a P2-02 não cria coluna de situação cadastral. Estados, transições e histórico do ciclo associativo permanecem na P2-04, que deve preceder qualquer funcionalidade dependente de vínculo vigente.
 

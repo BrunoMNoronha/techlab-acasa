@@ -25,6 +25,7 @@ Este diretório é a fonte oficial da documentação do projeto, em conjunto com
 ### Arquitetura
 - [`architecture/decision-log.md`](architecture/decision-log.md) — decisões arquiteturais, recomendações e pendências.
 - [`architecture/adr/0001-stack-mvp.md`](architecture/adr/0001-stack-mvp.md) — ADR da stack e arquitetura do MVP.
+- [`architecture/adr/0002-member-administration-authorization.md`](architecture/adr/0002-member-administration-authorization.md) — fundação mínima da capacidade `manage_members` (DT-015A).
 
 ### Segurança e privacidade
 - [`security/security-privacy.md`](security/security-privacy.md) — baseline de segurança, LGPD, acesso e auditoria.
@@ -32,6 +33,7 @@ Este diretório é a fonte oficial da documentação do projeto, em conjunto com
 
 ### Operação
 - [`operations/environments-observability.md`](operations/environments-observability.md) — ambientes, matriz de configuração, público x secreto, política de logs, captura de erros e resposta a vazamento de segredos.
+- [`operations/member-administration.md`](operations/member-administration.md) — concessão, conferência e revogação parametrizadas de `manage_members` somente na stack local.
 
 ### Entrega
 - [`delivery/backlog.md`](delivery/backlog.md) — backlog inicial por fases.

@@ -70,9 +70,9 @@ Esta decisão não autoriza contratação de plano pago.
 
 ### DT-015A — Recorte mínimo de autorização de associados
 
-**Status:** DECISÃO TÉCNICA de refinamento, 2026-09-14, Issue #22; ainda não implementada.
+**Status:** ACEITA E IMPLEMENTADA NA FUNDAÇÃO LOCAL, 2026-09-14, Issues #22 e #24.
 
-Concessão específica por UUID de usuário Auth, consultada no servidor e reforçada por grants mínimos/RLS. Sem papel ADMIN global, claims administrativas como fonte de verdade ou vínculo entre `members` e `auth.users`. Comparação, contrato e limites no [refinamento](../security/admin-authorization-refinement.md). DP-015B continua pendente de destinatários e autoridade organizacional; o CRUD permanece bloqueado. Registrar ADR no incremento em que a decisão passar a afetar implementação, conforme o processo abaixo.
+Concessão específica por UUID de usuário Auth, consultada no servidor e reforçada por grants mínimos/RLS. Sem papel ADMIN global, claims administrativas como fonte de verdade ou vínculo entre `members` e `auth.users`. O [ADR-0002](adr/0002-member-administration-authorization.md) registra a implementação; comparação, contrato e limites permanecem no [refinamento](../security/admin-authorization-refinement.md). DP-015B continua pendente de destinatários e autoridade organizacional; `members`/categorias continuam fechadas e o CRUD permanece bloqueado.
 
 ## Decisões arquiteturais pendentes
 
