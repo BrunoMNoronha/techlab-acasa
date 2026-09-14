@@ -100,6 +100,13 @@ Somente estes campos são serializados; qualquer outra chave é descartada e val
 
 Senha; token; access/refresh token; JWT; cookies; cabeçalho `Authorization`; chave publicável/secreta/service role; query string; body de formulários; e-mail; CPF/RG; telefone; endereço; qualquer dado pessoal não aprovado; objetos completos de request, headers, cookies, erro do Supabase, usuário, claims ou `process.env`; `stack`.
 
+**Privacidade de termos de busca (`q`):**
+Na P2-03, a pesquisa administrativa de associados utiliza o query parameter `q` na URL para manter o estado navegável. Como `q` carrega nomes ou razões sociais de associados, ele constitui dado pessoal e **nunca deve ser enviado ao logger da aplicação ou propagado para mensagens de erro técnicas**.
+
+> [!WARNING]
+> **Pendência para ambientes publicados:**
+> Em implantações remotas futuras (Preview/Production), deve-se verificar a configuração de logs e telemetria de borda/infraestrutura (ex.: access logs de CDN, provedores de DNS, gateways ou Vercel), assegurando que parâmetros de URL contendo dados pessoais (`q`) sejam mascarados ou não retidos desnecessariamente em logs de acesso públicos/compartilhados.
+
 A allow-list é a proteção principal: **não passe objetos arbitrários ao logger esperando que ele filtre**. Ela é uma defesa adicional, não uma autorização para despejar dados.
 
 ### Mensagem de erro em desenvolvimento

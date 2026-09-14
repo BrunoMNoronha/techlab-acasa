@@ -4,7 +4,7 @@ Sistema web para centralizar a gestão administrativa da ACASA e o relacionament
 
 ## Estado atual
 
-O projeto possui a arquitetura do MVP definida, a fundação executável da aplicação, a fundação local/versionada do banco de dados, a base de autenticação/autorização com Supabase Auth (login, logout, recuperação de acesso e rota protegida validada no servidor), a fundação de observabilidade e configuração por ambiente (logger estruturado, captura central de erros do servidor, páginas de erro genéricas e política de segredos) e o catálogo de categorias estatutárias com governança de alteração normativa. Funcionalidades de negócio continuam sendo implementadas somente a partir dos requisitos e decisões versionados em `docs/`.
+O projeto possui a arquitetura do MVP definida, a fundação executável da aplicação, a fundação local/versionada do banco de dados, a base de autenticação/autorização com Supabase Auth (login, logout, recuperação de acesso e rota protegida validada no servidor), a fundação de observabilidade e configuração por ambiente (logger estruturado, captura central de erros do servidor, páginas de erro genéricas e política de segredos), o catálogo de categorias estatutárias com governança de alteração normativa (P2-01), o cadastro administrativo mínimo de associados (P2-02) e a listagem com pesquisa textual, filtros e paginação server-side (P2-03) restrita a operadores com `manage_members`. Funcionalidades de negócio continuam sendo implementadas somente a partir dos requisitos e decisões versionados em `docs/`.
 
 ## Stack do MVP
 
@@ -210,10 +210,9 @@ A [Issue #22](https://github.com/BrunoMNoronha/techlab-acasa/issues/22) separou 
 
 ## Próximos passos
 
-Com a entrega do incremento 3 da P2-02, o cadastro administrativo mínimo de associados está funcional e protegido para operadores com a capacidade `manage_members`.
+Com a conclusão da P2-02 (cadastro administrativo mínimo) e da **P2-03** (pesquisa textual, filtros e paginação server-side na listagem de associados), o módulo de associados atende aos requisitos operacionais e de desempenho do RF-003 e RNF-008 para operadores com a capacidade `manage_members`.
 
 Permanece no backlog e em decisões futuras:
-- **P2-03**: listagem avançada com filtros, busca e paginação dinâmica;
 - **P2-04**: situação cadastral (`ATIVO`, `INATIVO`, `SUSPENSO`, `DESLIGADO`), histórico de transição e regras estatutárias de desativação (DP-005);
 - **P2-05**: perfis e permissões administrativas adicionais;
 - **P2-06**: trilha de auditoria estruturada em runtime;
