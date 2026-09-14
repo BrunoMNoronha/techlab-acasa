@@ -178,8 +178,18 @@ Inclui o **vínculo entre associado e categoria estatutária**, desmembrado da P
 
 **Delimitação mantida:** a P2-02 não cria coluna de situação cadastral. Estados, transições e histórico do ciclo associativo permanecem na P2-04, que deve preceder qualquer funcionalidade dependente de vínculo vigente. Pesquisa, filtros e paginação permanecem na P2-03.
 
-### P2-03 — Pesquisa e filtros
-Paginação e filtros necessários à operação real.
+### P2-03 — Pesquisa e filtros — CONCLUÍDO
+- Pesquisa textual server-side por nome / razão social (`members.name`) via PostgREST `ilike` com sanitização defensiva de wildcards (`%`, `_`, `\`);
+- Filtros server-side por tipo de pessoa (`PF` e `PJ`) e categoria estatutária dinâmica (`public.membership_categories`);
+- Paginação server-side com tamanho fixo de 25 registros por página, contagem total exata de registros filtrados (`count: exact`), ordenação determinística (`name ASC`, desempate por `id ASC`) e range de registros aplicado diretamente na consulta ao banco;
+- Gestão de estado preservada na URL via query parameters (`q`, `personType`, `category`, `page`), permitindo links estáveis e navegação voltar/avançar no navegador;
+- Validação e normalização defensiva de parâmetros de URL no servidor, falhando de forma segura e normalizando páginas inválidas/negativas/NaN para 1;
+- Interface `/area-restrita/associados` com formulário de busca/filtros, ação de limpar filtros, controles de navegação acessíveis (`<nav aria-label="Paginação de associados">`) e diferenciação semântica entre "nenhum associado cadastrado" e "nenhum associado encontrado para os filtros informados";
+- Proteção mantida com fail-closed através de `requireMemberAdministration()` e RLS condicionado a `public.can_manage_members()`; sem exposição de termos em logs e sem `service_role`;
+- Schema inalterado: sem criação de índices especulativos antecipados sem evidência de volume real (atendendo ao RNF-008);
+- Testes unitários do repositório, validações e página de associados, além de ampliação da suíte de integração `test:integration:member-admin-crud` (64 verificações passando).
+
+**Evidência:** Issue #28 e PR correspondente; CI validou aplicação, banco local e ambas as integrações Auth/Data API.
 
 ### P2-04 — Situação cadastral
 Implementar estados/transições apenas conforme `membership-model.md` e decisão final de normalização; preservar histórico de desligamento, exclusão, recurso e readmissão.

@@ -13,7 +13,7 @@
 |---|---|---|
 | RF-001 | Permitir autenticação, logout, recuperação de acesso e controle de sessão. | BASELINE |
 | RF-002 | Restringir funcionalidades conforme perfil/permissões do usuário. | BASELINE |
-| RF-003 | Permitir cadastrar, editar, consultar, pesquisar e filtrar associados. | **PARCIALMENTE ENTREGUE** — cadastro, edição, consulta/listagem simples e validações entregues pelo incremento 3 da P2-02 (Issue #26); pesquisa, filtros e paginação continuam pendentes para a P2-03 |
+| RF-003 | Permitir cadastrar, editar, consultar, pesquisar e filtrar associados. | **ENTREGUE** — cadastro, edição, consulta/listagem por ID e validações entregues pelo incremento 3 da P2-02 (Issue #26); pesquisa textual por nome, filtros de tipo/categoria e paginação server-side entregues pela P2-03 (Issue #28) |
 | RF-004 | Permitir encerrar e reativar/readmitir vínculo sem perda indevida de histórico, conforme regras aprovadas. | BASELINE; transições normativas parcialmente confirmadas |
 | RF-005 | Permitir associar categoria estatutária e acompanhar situação cadastral separadamente da financeira. | APROVADO para categorias; **PARCIALMENTE ENTREGUE** — catálogo referenciável (P2-01), integridade estrutural do vínculo no banco (P2-02, incremento 1) e operação administrativa de atribuição/alteração da categoria estatutária no cadastro (P2-02, incremento 3, Issue #26). O acompanhamento da situação cadastral permanece PENDENTE e pertence à P2-04. Normalização de estados documentada em `membership-model.md` |
 | RF-006 | Disponibilizar as categorias estatutárias Fundadores, Beneméritos e Contribuintes, impedindo alteração cotidiana sem autorização/governança adequada. | APROVADO pelo Estatuto 2025; **ENTREGUE** pela P2-01 |
@@ -54,7 +54,7 @@
 
 ## Rastreabilidade da autorização do cadastro
 
-RF-002 e RNF-002 permanecem BASELINE; RF-003 está PARCIALMENTE ENTREGUE (cadastro/edição/consulta da P2-02 entregues na Issue #26; pesquisa/filtros pendentes para P2-03). O [recorte mínimo de autorização](../security/admin-authorization-refinement.md) consolidou DT-015A (fundação técnica da Issue #24) e **DP-015B foi aprovada** pelo responsável pelo produto em 2026-09-14 (Issue #26). O acesso administrativo mínimo a `members` e `membership_categories` foi liberado de forma seletiva no servidor e no banco para contas com a capacidade `manage_members`. P2-05 mantém a responsabilidade pela matriz futura de permissões; P2-06 mantém a auditoria de runtime.
+RF-002 e RNF-002 permanecem BASELINE; RF-003 está **ENTREGUE** (cadastro/edição/consulta da P2-02 entregues na Issue #26; pesquisa, filtros e paginação entregues na P2-03, Issue #28). O [recorte mínimo de autorização](../security/admin-authorization-refinement.md) consolidou DT-015A (fundação técnica da Issue #24) e **DP-015B foi aprovada** pelo responsável pelo produto em 2026-09-14 (Issue #26). O acesso administrativo mínimo a `members` e `membership_categories` segue liberado de forma seletiva no servidor e no banco para contas com a capacidade `manage_members`. P2-05 mantém a responsabilidade pela matriz futura de permissões; P2-06 mantém a auditoria de runtime.
 
 ## Dados e entidades inicialmente identificadas
 

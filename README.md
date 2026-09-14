@@ -111,7 +111,7 @@ pnpm exec supabase status
 | `/auth/callback` | Callback PKCE que troca o código recebido por sessão. |
 | `/redefinir-senha` | Definição de nova senha (exige sessão de recuperação válida). |
 | `/area-restrita` | Rota autenticada de demonstração, com validação server-side própria e logout. |
-| `/area-restrita/associados` | Listagem administrativa simples de associados para operadores com `manage_members`. |
+| `/area-restrita/associados` | Listagem administrativa com pesquisa, filtros e paginação server-side para operadores com `manage_members`. |
 | `/area-restrita/associados/novo` | Formulário administrativo para cadastro de novos associados. |
 | `/area-restrita/associados/[id]` | Visualização detalhada do cadastro mínimo do associado. |
 | `/area-restrita/associados/[id]/editar` | Formulário administrativo de edição dos dados mínimos do associado. |
