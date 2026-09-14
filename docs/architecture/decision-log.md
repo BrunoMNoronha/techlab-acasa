@@ -68,6 +68,12 @@ Vercel será a hospedagem preferencial para a aplicação Next.js devido à inte
 
 Esta decisão não autoriza contratação de plano pago.
 
+### DT-015A — Recorte mínimo de autorização de associados
+
+**Status:** DECISÃO TÉCNICA de refinamento, 2026-09-14, Issue #22; ainda não implementada.
+
+Concessão específica por UUID de usuário Auth, consultada no servidor e reforçada por grants mínimos/RLS. Sem papel ADMIN global, claims administrativas como fonte de verdade ou vínculo entre `members` e `auth.users`. Comparação, contrato e limites no [refinamento](../security/admin-authorization-refinement.md). DP-015B continua pendente de destinatários e autoridade organizacional; o CRUD permanece bloqueado. Registrar ADR no incremento em que a decisão passar a afetar implementação, conforme o processo abaixo.
+
 ## Decisões arquiteturais pendentes
 
 | ID | Decisão | Impacto |

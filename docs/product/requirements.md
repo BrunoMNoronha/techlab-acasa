@@ -52,6 +52,10 @@
 | RNF-012 | A solução deve permitir backups, recuperação e observabilidade compatíveis com o ambiente definido. | BASELINE; metas PENDENTES |
 | RNF-013 | Formulários públicos devem limitar abuso automatizado e validar uploads/entradas antes de persistência definitiva. | BASELINE |
 
+## Rastreabilidade da autorização do cadastro
+
+RF-002/RF-003 e RNF-002 permanecem BASELINE. A [Issue #22](https://github.com/BrunoMNoronha/techlab-acasa/issues/22) detalha o [recorte mínimo de autorização](../security/admin-authorization-refinement.md): DT-015A define a solução técnica; DP-015B continua pendente de designação e aprovação organizacional. Nenhuma recomendação foi promovida a requisito de negócio. CRUD administrativo permanece bloqueado; a fundação local pode ser implementada separadamente, com dados fictícios e sem liberar `members`/categorias. P2-05 mantém a matriz futura de permissões; P2-06 mantém auditoria de runtime.
+
 ## Dados e entidades inicialmente identificadas
 
 Associado, Categoria, Usuário, Perfil, Permissão, Solicitação de Associação, Cobrança, Pagamento, Comprovante, Documento, Comunicado e Auditoria.
@@ -100,7 +104,7 @@ Antes de implementar os requisitos afetados, devem ser resolvidas as decisões s
 1. critérios operacionais de enquadramento nas categorias estatutárias, especialmente Benemérito e Contribuinte;
 2. confirmação da normalização operacional dos estados `ATIVO`, `DESLIGADO_VOLUNTARIAMENTE` e `EXCLUIDO_EX_OFFICIO`, além do fluxo de recurso/readmissão;
 3. campos/documentos obrigatórios no ingresso e finalidade de cada dado (decomposto em decisões objetivas em `member-model-refinement.md`);
-4. representação de pessoa jurídica na categoria Contribuinte, que condiciona estruturalmente o modelo de associado;
+4. destinatários da autorização administrativa inicial e responsável por aprovar concessões/revogações (DP-015B); a representação PF/PJ já foi resolvida por DP-013, conforme `member-model-refinement.md`, §0;
 5. estados do processo de solicitação e perfis operacionais responsáveis pela análise/aprovação;
 6. regras de cobrança, competência, vencimento e definição de adimplência;
 7. necessidade de migração de cadastros não financeiros;

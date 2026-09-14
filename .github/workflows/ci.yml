@@ -27,33 +27,35 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: npm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Runtime versions
         run: |
           node --version
-          npm --version
+          pnpm --version
 
       - name: Check tracked files for secret markers
-        run: npm run check:secrets
+        run: pnpm run check:secrets
 
       - name: Check tracked files for line endings
-        run: npm run check:eol
+        run: pnpm run check:eol
 
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
 
       - name: Typecheck
-        run: npm run typecheck
+        run: pnpm run typecheck
 
       - name: Test
-        run: npm test
+        run: pnpm run test
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
 
   database:
     name: Database migrations and tests
@@ -68,26 +70,28 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: npm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Supabase CLI version
-        run: npx supabase --version
+        run: pnpm exec supabase --version
 
       - name: Start local Supabase
-        run: npm run db:start
+        run: pnpm run db:start
 
       - name: Reset database from migrations
-        run: npm run db:reset
+        run: pnpm run db:reset
 
       - name: Lint database schema
-        run: npm run db:lint
+        run: pnpm run db:lint
 
       - name: Run database tests
-        run: npm run db:test
+        run: pnpm run db:test
 
       - name: Stop local Supabase
         if: always()
-        run: npm run db:stop
+        run: pnpm run db:stop

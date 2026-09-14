@@ -25,7 +25,7 @@ A configuração Supabase atualmente versionada é **somente para desenvolviment
 ## Requisitos locais
 
 - Node.js 24;
-- npm compatível com a distribuição do Node 24;
+- pnpm 11.25.0 (versão fixada em `package.json`);
 - Docker Desktop, Docker Engine ou outro runtime de containers compatível com o Supabase CLI para executar o banco local.
 
 Se utilizar `nvm`:
@@ -37,8 +37,8 @@ nvm use
 ## Instalação e execução da aplicação
 
 ```bash
-npm ci
-npm run dev
+pnpm install --frozen-lockfile
+pnpm run dev
 ```
 
 A aplicação ficará disponível por padrão em `http://localhost:3000`. Para os fluxos de autenticação, acesse pelo endereço configurado como `site_url` da stack local (`http://127.0.0.1:3000`) — veja a seção [Autenticação local](#autenticação-local).
@@ -50,26 +50,26 @@ O Supabase CLI está fixado como dependência de desenvolvimento e deve ser exec
 Inicie a stack local:
 
 ```bash
-npm run db:start
+pnpm run db:start
 ```
 
 Recrie o banco do zero aplicando todas as migrations versionadas:
 
 ```bash
-npm run db:reset
+pnpm run db:reset
 ```
 
 Valide schema e testes de banco:
 
 ```bash
-npm run db:lint
-npm run db:test
+pnpm run db:lint
+pnpm run db:test
 ```
 
 Ao terminar:
 
 ```bash
-npm run db:stop
+pnpm run db:stop
 ```
 
 A stack local é destinada exclusivamente a desenvolvimento/testes e não deve ser exposta publicamente. Não use `supabase link`, `supabase db push` ou comandos equivalentes contra ambiente remoto sem uma tarefa específica e configuração segura de credenciais.
@@ -90,7 +90,7 @@ A aplicação usa somente variáveis públicas:
 Nenhuma chave secreta/`service_role` é usada pela aplicação. Copie `.env.example` para `.env.local` (ignorado pelo Git) e preencha com os valores exibidos por:
 
 ```bash
-npx supabase status
+pnpm exec supabase status
 ```
 
 `NEXT_PUBLIC_*` é incorporado ao bundle do navegador no build: nunca use esse prefixo para segredos. A matriz de configuração por ambiente (local, preview, production), a política de logs e o procedimento em caso de vazamento de segredo estão em [`docs/operations/environments-observability.md`](docs/operations/environments-observability.md).
@@ -125,8 +125,8 @@ Como não há cadastro público, crie usuários de teste administrativamente no 
 
 ### Validação manual sugerida
 
-1. `npm run db:start`, `npm run db:reset` e configure `.env.local`;
-2. `npm run dev` e acesse `http://127.0.0.1:3000/login`;
+1. `pnpm run db:start`, `pnpm run db:reset` e configure `.env.local`;
+2. `pnpm run dev` e acesse `http://127.0.0.1:3000/login`;
 3. confirme que `/area-restrita` redireciona para o login sem sessão e abre após o login;
 4. use **Sair** e confirme o retorno ao login;
 5. em `/recuperar-acesso`, solicite a recuperação, abra o e-mail em `http://127.0.0.1:54324`, siga o link e defina a nova senha.
@@ -136,12 +136,12 @@ Como não há cadastro público, crie usuários de teste administrativamente no 
 Execute antes de publicar alterações:
 
 ```bash
-npm run check:secrets
-npm run check:eol
-npm run lint
-npm run typecheck
-npm test
-npm run build
+pnpm run check:secrets
+pnpm run check:eol
+pnpm run lint
+pnpm run typecheck
+pnpm run test
+pnpm run build
 ```
 
 `check:secrets` varre os arquivos rastreados pelo Git em busca de marcadores de segredo (sem imprimir valores) e também roda na CI.
@@ -151,19 +151,19 @@ npm run build
 Quando houver mudança de banco, execute também:
 
 ```bash
-npm run db:start
-npm run db:reset
-npm run db:lint
-npm run db:test
-npm run db:stop
+pnpm run db:start
+pnpm run db:reset
+pnpm run db:lint
+pnpm run db:test
+pnpm run db:stop
 ```
 
 O pipeline de CI executa as verificações de marcadores de segredo e de fim de linha, além das verificações da aplicação em Node 24, e valida migrations/testes de banco em uma stack Supabase local isolada.
 
 ## Convenções do repositório
 
-- fim de linha **LF** para todo arquivo de texto, aplicado pelo `.gitattributes` (Git) e declarado no `.editorconfig` (editores), verificado por `npm run check:eol`;
-- a normalização mantém migrations SQL, scripts e workflows idênticos em qualquer sistema operacional, preservando a garantia de que `npm run db:reset` reproduz o banco do zero.
+- fim de linha **LF** para todo arquivo de texto, aplicado pelo `.gitattributes` (Git) e declarado no `.editorconfig` (editores), verificado por `pnpm run check:eol`;
+- a normalização mantém migrations SQL, scripts e workflows idênticos em qualquer sistema operacional, preservando a garantia de que `pnpm run db:reset` reproduz o banco do zero.
 
 ## Princípios
 
@@ -193,6 +193,12 @@ Documentos prioritários:
 - [Riscos e decisões pendentes](docs/delivery/risks-decisions.md)
 - [Definition of Done e critérios do MVP](docs/delivery/definition-of-done.md)
 - [Instruções para agentes](docs/agents/project-instructions.md)
+
+## Refinamento da autorização administrativa
+
+A [Issue #22](https://github.com/BrunoMNoronha/techlab-acasa/issues/22) separa DT-015A (decisão técnica: concessão específica por UUID, consultada no servidor e reforçada por RLS) de **DP-015B, ainda pendente** (quem recebe acesso e quem autoriza concessões/revogações na ACASA). O [refinamento](docs/security/admin-authorization-refinement.md) especifica bootstrap, revogação e testes; não cria tabelas, policies, operadores nem CRUD.
+
+O próximo incremento pode implementar a fundação mínima local com dados fictícios e tabelas de negócio fechadas, em tarefa própria. O CRUD continua bloqueado pela decisão organizacional e pela implementação/verificação dessa fundação. P2-05 mantém a matriz futura e P2-06 a auditoria de runtime.
 
 ## Próximos passos
 

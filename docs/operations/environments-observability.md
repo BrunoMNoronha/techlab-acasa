@@ -8,7 +8,7 @@
 
 | Ambiente | Onde roda | Como é acionado | Banco/Auth | Estado |
 |---|---|---|---|---|
-| **Local / development** | máquina do desenvolvedor (`next dev`) | `npm run dev` | stack Supabase local (`npm run db:start`) | **existe** |
+| **Local / development** | máquina do desenvolvedor (`next dev`) | `pnpm run dev` | stack Supabase local (`pnpm run db:start`) | **existe** |
 | **Preview** | hospedagem preferencial (Vercel, ADR-0001) | push em branch que não é `main` / PR | futuro projeto Supabase remoto de não produção | **não existe**; não criar sem tarefa específica |
 | **Production** | hospedagem preferencial (Vercel, ADR-0001) | merge em `main` | futuro projeto Supabase remoto de produção | **não existe**; não criar sem tarefa específica e decisão de custo |
 
@@ -22,7 +22,7 @@ Fatos confirmados nas fontes oficiais (2026-09-02):
 | Configuração | Classificação | Local | Preview | Production |
 |---|---|---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | pública (vai ao bundle) | `http://127.0.0.1:54321` (stack local) | URL do futuro projeto remoto — **valor não existe** | URL do futuro projeto remoto — **valor não existe** |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | pública (vai ao bundle) | `sb_publishable_...` exibida por `npx supabase status` | variável do ambiente Preview — **valor não existe** | variável do ambiente Production — **valor não existe** |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | pública (vai ao bundle) | `sb_publishable_...` exibida por `pnpm exec supabase status` | variável do ambiente Preview — **valor não existe** | variável do ambiente Production — **valor não existe** |
 
 Regras:
 
@@ -40,9 +40,9 @@ Regras:
 
 ## Configuração local
 
-1. `npm run db:start` e `npx supabase status` para obter URL e chave publicável locais;
+1. `pnpm run db:start` e `pnpm exec supabase status` para obter URL e chave publicável locais;
 2. copie `.env.example` para `.env.local` e preencha os valores;
-3. `npm run dev` e acesse `http://127.0.0.1:3000`.
+3. `pnpm run dev` e acesse `http://127.0.0.1:3000`.
 
 Arquivos reais (`.env`, `.env.local`, `.env.development.local`, `.env.production.local`, `.env.test.local` e variantes) são ignorados pelo Git (`.gitignore`: `.env*` com exceção de `.env.example`). Confirme com:
 
@@ -133,7 +133,7 @@ Eventos atuais:
 1. Reproduza ou obtenha a data/hora aproximada do erro.
 2. Localize nos logs da plataforma (ou no terminal local) a linha com `"event":"server.request_error"`.
 3. Use `routePath`, `routeType` e `errorName` para identificar o ponto de falha; `digest` correlaciona com o erro que o cliente recebeu.
-4. Reproduza localmente com `npm run dev`: em desenvolvimento a mensagem aparece em `errorMessage` e a stack no terminal.
+4. Reproduza localmente com `pnpm run dev`: em desenvolvimento a mensagem aparece em `errorMessage` e a stack no terminal.
 5. Corrija com teste de regressão; não adicione campos ao logger para "ver mais" sem revisar esta política.
 
 ## Prevenção de vazamento de segredos
@@ -142,7 +142,7 @@ Camadas, todas obrigatórias:
 
 1. `.gitignore` ignora `.env*` (exceto `.env.example`).
 2. `.env.example` somente com placeholders; revisão de PR verifica o diff.
-3. `npm run check:secrets` (`scripts/check-secret-markers.mjs`), executado na CI: varre **todos** os arquivos rastreados pelo Git, incluindo `package-lock.json`, por marcadores (`sb_secret_...`, JWT, chave PEM, tokens GitHub/Supabase CLI) e falha sem imprimir valores. Padrões exigem comprimento mínimo para não acusar menções documentais.
+3. `pnpm run check:secrets` (`scripts/check-secret-markers.mjs`), executado na CI: varre **todos** os arquivos rastreados pelo Git, incluindo `pnpm-lock.yaml`, por marcadores (`sb_secret_...`, JWT, chave PEM, tokens GitHub/Supabase CLI) e falha sem imprimir valores. Padrões exigem comprimento mínimo para não acusar menções documentais.
 4. GitHub secret scanning e push protection (ver abaixo).
 5. `getSupabasePublicConfig()` recusa chave secreta em variável pública.
 
