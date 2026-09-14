@@ -18,6 +18,7 @@
     "db:lint": "supabase db lint --level error",
     "db:test": "supabase test db",
     "test:integration:member-admin-auth": "node scripts/test-member-administration-integration.mjs",
+    "test:integration:member-admin-crud": "node scripts/test-member-administration-crud.mjs",
     "check:secrets": "node scripts/check-secret-markers.mjs",
     "check:eol": "node scripts/check-line-endings.mjs"
   },
