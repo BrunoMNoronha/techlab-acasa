@@ -223,6 +223,82 @@ async function main() {
     check(updatePf.data.name === `Associado PF Renomeado ${suffix}`, "nome do associado PF não foi alterado");
     check(updatePf.data.membership_category_code === "BENEMERITO", "categoria do associado PF não foi alterada");
 
+    // 5.1 P2-03: Pesquisa textual por nome, filtros e paginação server-side
+    // Busca textual por nome/razão social
+    const searchByName = await authorized
+      .from("members")
+      .select("id, name")
+      .ilike("name", `%PF Renomeado ${suffix}%`);
+    checkNoError(searchByName, "B não conseguiu pesquisar associado por nome via ilike");
+    check(searchByName.data.length === 1, `esperado exatamente 1 resultado para busca textual, recebido: ${searchByName.data.length}`);
+    check(searchByName.data[0].id === memberPfId, "resultado da busca por nome diverge do esperado");
+
+    // Busca textual sem correspondência
+    const searchNoMatch = await authorized
+      .from("members")
+      .select("id")
+      .ilike("name", `%Inexistente-${suffix}%`);
+    checkNoError(searchNoMatch, "B não conseguiu pesquisar com resultado vazio");
+    check(searchNoMatch.data.length === 0, "busca por nome inexistente retornou linhas indevidas");
+
+    // Filtro por tipo de pessoa (PF)
+    const filterPf = await authorized
+      .from("members")
+      .select("id")
+      .eq("person_type", "PF")
+      .ilike("name", `%${suffix}%`);
+    checkNoError(filterPf, "B não conseguiu filtrar por person_type PF");
+    check(filterPf.data.length === 1 && filterPf.data[0].id === memberPfId, "filtro PF não retornou associado correto");
+
+    // Filtro por tipo de pessoa (PJ)
+    const filterPj = await authorized
+      .from("members")
+      .select("id")
+      .eq("person_type", "PJ")
+      .ilike("name", `%${suffix}%`);
+    checkNoError(filterPj, "B não conseguiu filtrar por person_type PJ");
+    check(filterPj.data.length === 1 && filterPj.data[0].id === memberPjId, "filtro PJ não retornou associado correto");
+
+    // Filtro por categoria estatutária
+    const filterCategory = await authorized
+      .from("members")
+      .select("id")
+      .eq("membership_category_code", "FUNDADOR")
+      .ilike("name", `%${suffix}%`);
+    checkNoError(filterCategory, "B não conseguiu filtrar por categoria estatutária");
+    check(filterCategory.data.length === 1 && filterCategory.data[0].id === memberPjId, "filtro por categoria não retornou registro esperado");
+
+    // Combinação de pesquisa, tipo e categoria
+    const filterCombined = await authorized
+      .from("members")
+      .select("id")
+      .eq("person_type", "PJ")
+      .eq("membership_category_code", "FUNDADOR")
+      .ilike("name", `%Empresa Fictícia PJ ${suffix}%`);
+    checkNoError(filterCombined, "B não conseguiu filtrar por combinação de critérios");
+    check(filterCombined.data.length === 1 && filterCombined.data[0].id === memberPjId, "filtro combinado retornou registro incorreto");
+
+    // Paginação server-side com range e count exact
+    const paginatedQuery = await authorized
+      .from("members")
+      .select("id, name", { count: "exact" })
+      .ilike("name", `%${suffix}%`)
+      .order("name", { ascending: true })
+      .order("id", { ascending: true })
+      .range(0, 0); // apenas 1 item
+    checkNoError(paginatedQuery, "B não conseguiu executar consulta paginada");
+    check(paginatedQuery.data.length === 1, `paginação com range(0,0) deve trazer 1 item, trouxe: ${paginatedQuery.data.length}`);
+    check(paginatedQuery.count === 2, `count exact deve ser 2 para as fixtures do teste, foi: ${paginatedQuery.count}`);
+
+    // Usuário comum (A) tenta fazer a consulta paginada com filtro e recebe zero linhas por RLS
+    const commonQuery = await common
+      .from("members")
+      .select("id, name", { count: "exact" })
+      .ilike("name", `%${suffix}%`);
+    checkNoError(commonQuery, "usuário comum A gerou erro técnico inesperado ao consultar");
+    check(commonQuery.data.length === 0, "usuário comum A enxergou associados via consulta paginada");
+    check(commonQuery.count === 0, "usuário comum A obteve contagem de associados via RLS");
+
     // Operações proibidas para B:
     // DELETE proibido por ACL
     checkPermissionDenied(
