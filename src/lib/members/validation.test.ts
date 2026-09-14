@@ -203,14 +203,25 @@ describe("validation", () => {
       expect(normalizeMemberListParams({ category: "   " })).toEqual({ page: 1 });
     });
 
-    it("normaliza parâmetro page convertendo valores inválidos para 1", () => {
+    it("normaliza parâmetro page aceitando estritamente apenas inteiros seguros >= 1", () => {
+      // Casos válidos
       expect(normalizeMemberListParams({ page: "3" })).toEqual({ page: 3 });
       expect(normalizeMemberListParams({ page: 4 })).toEqual({ page: 4 });
+      expect(normalizeMemberListParams({ page: 1 })).toEqual({ page: 1 });
+
+      // Casos inválidos normalizados para 1
+      expect(normalizeMemberListParams({ page: "2.5" })).toEqual({ page: 1 });
+      expect(normalizeMemberListParams({ page: 2.5 })).toEqual({ page: 1 });
+      expect(normalizeMemberListParams({ page: "2abc" })).toEqual({ page: 1 });
       expect(normalizeMemberListParams({ page: "0" })).toEqual({ page: 1 });
+      expect(normalizeMemberListParams({ page: 0 })).toEqual({ page: 1 });
       expect(normalizeMemberListParams({ page: "-5" })).toEqual({ page: 1 });
+      expect(normalizeMemberListParams({ page: -5 })).toEqual({ page: 1 });
       expect(normalizeMemberListParams({ page: "invalido" })).toEqual({ page: 1 });
       expect(normalizeMemberListParams({ page: NaN })).toEqual({ page: 1 });
-      expect(normalizeMemberListParams({ page: 2.7 })).toEqual({ page: 2 });
+      expect(normalizeMemberListParams({ page: Infinity })).toEqual({ page: 1 });
+      expect(normalizeMemberListParams({ page: -Infinity })).toEqual({ page: 1 });
+      expect(normalizeMemberListParams({ page: Number.MAX_SAFE_INTEGER + 1 })).toEqual({ page: 1 });
     });
 
     it("combina todos os parâmetros normalizados com segurança", () => {

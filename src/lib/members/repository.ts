@@ -24,7 +24,7 @@ export async function getMembershipCategories(): Promise<MembershipCategory[]> {
     .order("name", { ascending: true });
 
   if (error || !data) {
-    return [];
+    throw new Error("Falha ao consultar catálogo de categorias estatutárias.");
   }
 
   return data as MembershipCategory[];
@@ -39,6 +39,7 @@ export async function getMembershipCategories(): Promise<MembershipCategory[]> {
  * - Ordenação determinística: `name ASC`, com desempate por `id ASC`.
  * - Segurança: parâmetros de ILIKE são sanitizados contra injeção de wildcards;
  *   filtros são aplicados via API tipada do PostgREST; RLS ativo com sessão do operador.
+ * - Falhas operacionais propagam erro sanitizado para os error boundaries sem expor PII.
  */
 export async function listMembers(
   params: MemberListParams = {},
@@ -82,13 +83,7 @@ export async function listMembers(
   const { data, count, error } = await query;
 
   if (error || !data) {
-    return {
-      items: [],
-      page,
-      pageSize,
-      totalCount: 0,
-      totalPages: 1,
-    };
+    throw new Error("Falha ao consultar listagem de associados.");
   }
 
   const totalCount = count ?? 0;

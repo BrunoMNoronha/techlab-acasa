@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 /**
- * Integração ponta-a-ponta local do CRUD de associados (P2-02, incremento 3).
+ * Integração Auth + Data API do cadastro e consulta de associados (P2-02 e P2-03).
  *
- * Valida autorização seletiva, isolamento, CRUD de dados mínimos e revogação
- * imediata com Auth real, JWT assinado, chave publicável e Data API.
+ * Valida autorização seletiva, isolamento por RLS, CRUD de dados mínimos, pesquisa
+ * textual, filtros, paginação server-side e revogação imediata com Auth real,
+ * JWT assinado, chave publicável e Data API (não é E2E de navegador/interface).
  */
 import { spawnSync } from "node:child_process";
 import { randomBytes, randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { createClient } from "@supabase/supabase-js";
+import { sanitizeIlikePattern } from "../src/lib/members/validation.ts";
 
 function readLocalSupabaseEnvironment() {
   const supabaseCli = fileURLToPath(
@@ -241,14 +243,56 @@ async function main() {
     checkNoError(searchNoMatch, "B não conseguiu pesquisar com resultado vazio");
     check(searchNoMatch.data.length === 0, "busca por nome inexistente retornou linhas indevidas");
 
-    // Filtro por tipo de pessoa (PF)
+    // Validação real de busca literal com caracteres especiais % e _
+    const specialName = `Associado com 100%_bonus ${suffix}`;
+    const insertSpecial = await authorized
+      .from("members")
+      .insert({
+        person_type: "PF",
+        name: specialName,
+        membership_category_code: "CONTRIBUINTE",
+      })
+      .select()
+      .single();
+    checkNoError(insertSpecial, "B não conseguiu inserir associado com caracteres especiais");
+    const specialMemberId = insertSpecial.data.id;
+    createdMemberIds.push(specialMemberId);
+
+    // Busca literal usando sanitizeIlikePattern pelo trecho "100%_bonus"
+    const escapedTerm = sanitizeIlikePattern(`100%_bonus ${suffix}`);
+    const searchSpecialLiteral = await authorized
+      .from("members")
+      .select("id, name")
+      .ilike("name", `%${escapedTerm}%`);
+    checkNoError(searchSpecialLiteral, "B não conseguiu pesquisar por termo literal com wildcards");
+    check(
+      searchSpecialLiteral.data.length === 1 && searchSpecialLiteral.data[0].id === specialMemberId,
+      "busca literal por 100%_bonus não encontrou exatamente o registro criado",
+    );
+
+    // Sem sanitização, "100X_bonus" casaria se "_" fosse tratado como wildcard;
+    // com sanitização, a busca por "100X_bonus" não deve encontrar o registro com "%_"
+    const escapedDifferentTerm = sanitizeIlikePattern(`100X_bonus ${suffix}`);
+    const searchNegative = await authorized
+      .from("members")
+      .select("id")
+      .ilike("name", `%${escapedDifferentTerm}%`);
+    checkNoError(searchNegative, "pesquisa negativa com caractere divergente falhou");
+    check(searchNegative.data.length === 0, "busca sem correspondência literal encontrou registros indevidos");
+
+    // Filtro por tipo de pessoa (PF) - criados memberPfId e specialMemberId
     const filterPf = await authorized
       .from("members")
       .select("id")
       .eq("person_type", "PF")
       .ilike("name", `%${suffix}%`);
     checkNoError(filterPf, "B não conseguiu filtrar por person_type PF");
-    check(filterPf.data.length === 1 && filterPf.data[0].id === memberPfId, "filtro PF não retornou associado correto");
+    check(
+      filterPf.data.length === 2 &&
+        filterPf.data.some((m) => m.id === memberPfId) &&
+        filterPf.data.some((m) => m.id === specialMemberId),
+      "filtro PF não retornou associados PF corretos",
+    );
 
     // Filtro por tipo de pessoa (PJ)
     const filterPj = await authorized
@@ -288,7 +332,7 @@ async function main() {
       .range(0, 0); // apenas 1 item
     checkNoError(paginatedQuery, "B não conseguiu executar consulta paginada");
     check(paginatedQuery.data.length === 1, `paginação com range(0,0) deve trazer 1 item, trouxe: ${paginatedQuery.data.length}`);
-    check(paginatedQuery.count === 2, `count exact deve ser 2 para as fixtures do teste, foi: ${paginatedQuery.count}`);
+    check(paginatedQuery.count === 3, `count exact deve ser 3 para as fixtures do teste, foi: ${paginatedQuery.count}`);
 
     // Usuário comum (A) tenta fazer a consulta paginada com filtro e recebe zero linhas por RLS
     const commonQuery = await common
@@ -364,7 +408,7 @@ async function main() {
     check(updateRevoked.data.length === 0, "B alterou linhas após revogação");
 
     console.log(
-      `Integração CRUD de Associados: ${checks} verificações passaram com fixtures locais efêmeras.`,
+      `Integração Auth + Data API de Associados: ${checks} verificações passaram com fixtures locais efêmeras.`,
     );
   } finally {
     // Limpeza de fixtures criadas

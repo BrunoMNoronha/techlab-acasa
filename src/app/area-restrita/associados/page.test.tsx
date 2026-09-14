@@ -4,6 +4,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const requireMemberAdministration = vi.fn();
 const listMembers = vi.fn();
 const getMembershipCategories = vi.fn();
+const redirect = vi.fn((url: string) => {
+  throw new Error(`REDIRECT:${url}`);
+});
+
+vi.mock("next/navigation", () => ({
+  redirect: (url: string) => redirect(url),
+}));
 
 vi.mock("@/lib/auth/member-administration", () => ({
   requireMemberAdministration: () => requireMemberAdministration(),
@@ -171,5 +178,61 @@ describe("AssociadosPage", () => {
     const prevLink = screen.getByRole("link", { name: "← Anterior" });
     expect(prevLink).toHaveAttribute("href", "/area-restrita/associados");
     expect(screen.getByText("Próxima →")).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("redireciona canonicamente para a última página válida se page > totalPages com totalCount > 0", async () => {
+    listMembers.mockResolvedValue({
+      items: [],
+      page: 5,
+      pageSize: 25,
+      totalCount: 50,
+      totalPages: 2,
+    });
+
+    await expect(
+      AssociadosPage({
+        searchParams: Promise.resolve({
+          q: "Empresa",
+          personType: "PJ",
+          category: "FUNDADOR",
+          page: "5",
+        }),
+      }),
+    ).rejects.toThrow(
+      "REDIRECT:/area-restrita/associados?q=Empresa&personType=PJ&category=FUNDADOR&page=2",
+    );
+
+    expect(redirect).toHaveBeenCalledWith(
+      "/area-restrita/associados?q=Empresa&personType=PJ&category=FUNDADOR&page=2",
+    );
+  });
+
+  it("não faz redirecionamento indevido quando totalCount === 0 (estado vazio legítimo)", async () => {
+    listMembers.mockResolvedValue({
+      items: [],
+      page: 1,
+      pageSize: 25,
+      totalCount: 0,
+      totalPages: 1,
+    });
+
+    render(
+      await AssociadosPage({
+        searchParams: Promise.resolve({ q: "Inexistente" }),
+      }),
+    );
+
+    expect(redirect).not.toHaveBeenCalled();
+    expect(
+      screen.getByText("Nenhum associado encontrado para os filtros informados."),
+    ).toBeInTheDocument();
+  });
+
+  it("propaga erro sanitizado e não renderiza estado vazio quando listMembers falhar", async () => {
+    listMembers.mockRejectedValue(new Error("Falha ao consultar listagem de associados."));
+
+    await expect(
+      AssociadosPage({ searchParams: Promise.resolve({}) }),
+    ).rejects.toThrow("Falha ao consultar listagem de associados.");
   });
 });
