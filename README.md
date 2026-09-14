@@ -187,8 +187,10 @@ Documentos prioritários:
 - [Modelo de categorias e vínculo](docs/product/membership-model.md)
 - [Decisões arquiteturais](docs/architecture/decision-log.md)
 - [ADR da stack do MVP](docs/architecture/adr/0001-stack-mvp.md)
+- [ADR da autorização administrativa](docs/architecture/adr/0002-member-administration-authorization.md)
 - [Segurança e privacidade](docs/security/security-privacy.md)
 - [Ambientes, configuração e observabilidade](docs/operations/environments-observability.md)
+- [Operação local de `manage_members`](docs/operations/member-administration.md)
 - [Backlog por fases](docs/delivery/backlog.md)
 - [Riscos e decisões pendentes](docs/delivery/risks-decisions.md)
 - [Definition of Done e critérios do MVP](docs/delivery/definition-of-done.md)
@@ -196,9 +198,9 @@ Documentos prioritários:
 
 ## Refinamento da autorização administrativa
 
-A [Issue #22](https://github.com/BrunoMNoronha/techlab-acasa/issues/22) separa DT-015A (decisão técnica: concessão específica por UUID, consultada no servidor e reforçada por RLS) de **DP-015B, ainda pendente** (quem recebe acesso e quem autoriza concessões/revogações na ACASA). O [refinamento](docs/security/admin-authorization-refinement.md) especifica bootstrap, revogação e testes; não cria tabelas, policies, operadores nem CRUD.
+A [Issue #22](https://github.com/BrunoMNoronha/techlab-acasa/issues/22) separou DT-015A (decisão técnica) de **DP-015B, ainda pendente** (quem recebe acesso e quem autoriza concessões/revogações na ACASA). A Issue #24 implementa a fundação DT-015A: concessão específica por UUID, RLS/ACL de leitura própria, predicado corrente, guard server-only e testes com Auth/JWT/Data API locais. Nenhuma pessoa real recebeu acesso.
 
-O próximo incremento pode implementar a fundação mínima local com dados fictícios e tabelas de negócio fechadas, em tarefa própria. O CRUD continua bloqueado pela decisão organizacional e pela implementação/verificação dessa fundação. P2-05 mantém a matriz futura e P2-06 a auditoria de runtime.
+`public.members` e `public.membership_categories` continuam fechadas e não existe CRUD. O bloqueador técnico foi removido, mas o CRUD continua bloqueado exclusivamente pela decisão organizacional DP-015B. P2-05 mantém a matriz futura e P2-06 a auditoria de runtime.
 
 ## Próximos passos
 
@@ -206,4 +208,4 @@ Com a Fase 1 (fundação técnica) concluída e o catálogo de categorias estatu
 
 O **incremento 1** está entregue: a migration `supabase/migrations/20260903120000_create_members.sql` cria `public.members` como entidade única com tipo de pessoa (`PF`/`PJ`), chave primária `uuid`, `name` obrigatório, categoria estatutária obrigatória por chave estrangeira, `email` e `phone` opcionais e RLS habilitado sem policy, com `anon` e `authenticated` sem privilégio. Nenhum outro dado pessoal foi coletado e não existe situação cadastral nem vínculo com `auth.users`.
 
-A parte **utilizável** da P2-02 — CRUD administrativo, telas, pesquisa e Server Actions — continua bloqueada por **DP-015** (recorte mínimo de autorização administrativa): sem modelo de permissão, um CRUD só poderia liberar acesso a toda conta autenticada ou a ninguém. Também permanecem abertas DP-006A (existência de cadastro legado a importar), DP-008 na parcela da inscrição pública (P2-08/P2-09) e DP-005 para a situação cadastral (P2-04). Perfis/permissões administrativas (P2-05) dependem de decisões ainda registradas como pendentes. Os ambientes Preview/Production ainda não existem e sua criação exige tarefa específica e decisão de custo. Entidades e campos de negócio só devem ser adicionados quando suas regras estiverem suficientemente definidas.
+A fundação técnica da capacidade `manage_members` está pronta, mas a parte **utilizável** da P2-02 — CRUD administrativo, telas, pesquisa e Server Actions — continua bloqueada por **DP-015B**: a ACASA ainda precisa definir destinatários e autoridade para concessão/revogação. Também permanecem abertas DP-006A (existência de cadastro legado a importar), DP-008 na parcela da inscrição pública (P2-08/P2-09) e DP-005 para a situação cadastral (P2-04). Perfis/permissões administrativas (P2-05) dependem de decisões ainda registradas como pendentes. Os ambientes Preview/Production ainda não existem e sua criação exige tarefa específica e decisão de custo. Entidades e campos de negócio só devem ser adicionados quando suas regras estiverem suficientemente definidas.

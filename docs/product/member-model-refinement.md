@@ -40,11 +40,11 @@ D11 (mecânica da chave estrangeira) e D16 (sequenciamento de autorização) nã
 
 A migration `supabase/migrations/20260903120000_create_members.sql` cria `public.members` conforme a §0 e nada além disso. A P2-02 permanece **EM ANDAMENTO**: o cadastro ainda não é operável, porque não existe CRUD administrativo.
 
-## Atualização de autorização — 2026-09-14 (Issue #22)
+## Atualização de autorização — 2026-09-14 (Issues #22 e #24)
 
-O [refinamento específico de DP-015](../security/admin-authorization-refinement.md) é a fonte atual para autorização. DT-015A escolhe tecnicamente uma concessão específica por UUID de usuário Auth, sem vínculo com `members` (D13 preservada). **DP-015B continua pendente:** quem recebe acesso e quem aprova concessões/revogações. CRUD, telas e Server Actions permanecem bloqueados. Uma fundação local separada, com dados fictícios e tabelas de negócio fechadas, pode ser o próximo incremento; não foi implementada aqui.
+O [refinamento específico de DP-015](../security/admin-authorization-refinement.md) é a fonte atual para autorização. DT-015A escolheu e a Issue #24 implementou uma concessão específica por UUID de usuário Auth, sem vínculo com `members` (D13 preservada). **DP-015B continua pendente:** quem recebe acesso e quem aprova concessões/revogações. CRUD, telas e Server Actions permanecem bloqueados. A fundação usa somente dados fictícios nos testes e mantém as tabelas de negócio fechadas.
 
-A análise histórica de §2/D16 permanece para rastreabilidade: a alternativa A foi entregue no incremento 1; o mecanismo mínimo para avançar na alternativa B agora está especificado no documento de autorização, sem antecipar toda P2-05.
+A análise histórica de §2/D16 permanece para rastreabilidade: a alternativa A foi entregue no incremento 1; o mecanismo mínimo da alternativa B está implementado como fundação, sem antecipar toda P2-05 nem liberar CRUD antes da DP-015B.
 
 ## Convenção de classificação usada neste documento
 
@@ -85,7 +85,7 @@ Nenhuma **RECOMENDAÇÃO** deste documento deve ser lida como regra aprovada. Re
 
 ### Dependência de autorização entre P2-02 e P2-05
 
-Registro histórico do refinamento inicial; para o estado atual de DT-015A/DP-015B, consulte a atualização acima. Há uma dependência real de sequenciamento para a entrega utilizável da P2-02. Hoje, a identidade autenticada expõe apenas `{ userId }` (P1-04), não existe modelo de permissão (P2-05), `authenticated` não possui privilégio algum sobre tabelas de negócio e a aplicação não pode usar `service_role`. Nesse estado, uma P2-02 que entregue cadastro, edição e consulta só teria dois desfechos possíveis, ambos inaceitáveis: conceder acesso administrativo a **toda** conta autenticada, ou não permitir acesso a **ninguém**.
+Registro histórico do refinamento inicial; para o estado atual de DT-015A/DP-015B, consulte a atualização acima. A dependência real de sequenciamento foi tratada em duas partes: a fundação técnica agora distingue `manage_members`, mas `authenticated` continua sem privilégio sobre tabelas de negócio e a aplicação continua sem `service_role`. Antes da fundação, uma P2-02 que entregasse cadastro, edição e consulta teria dois desfechos possíveis, ambos inaceitáveis: conceder acesso administrativo a **toda** conta autenticada, ou não permitir acesso a **ninguém**.
 
 Alternativas:
 

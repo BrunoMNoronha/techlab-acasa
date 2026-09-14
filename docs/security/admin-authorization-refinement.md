@@ -1,8 +1,8 @@
 # Autorização administrativa mínima de associados — DP-015
 
 - **Data:** 2026-09-14.
-- **Rastreabilidade:** [Issue #22](https://github.com/BrunoMNoronha/techlab-acasa/issues/22), RF-002/RF-003/RNF-002, P2-02 ↔ P2-05, D13.
-- **Status:** refinamento técnico concluído; **DP-015 permanece PENDENTE na parcela de produto**. Este documento não implementa nem concede acesso.
+- **Rastreabilidade:** [Issue #22](https://github.com/BrunoMNoronha/techlab-acasa/issues/22), [Issue #24](https://github.com/BrunoMNoronha/techlab-acasa/issues/24), RF-002/RF-003/RNF-002, P2-02 ↔ P2-05, D13.
+- **Status:** DT-015A implementada na fundação local; **DP-015B permanece PENDENTE**. Nenhum acesso real ou CRUD foi concedido.
 - **Fonte principal:** este documento especifica autorização; campos e decisões já aprovados permanecem em [member-model-refinement.md, §0](../product/member-model-refinement.md).
 
 ## 1. Evidência e classificação
@@ -11,20 +11,20 @@
 |---|---|
 | **FATO CONFIRMADO** | Evidência inspecionada em código/documentação e GitHub, sem inferir estado de ambiente remoto |
 | **REQUISITO APROVADO** | D13 e o pacote de dados de §0 continuam válidos; categorias de RF-005/RF-006 permanecem aprovadas. RF-002, RF-003 e RNF-002 continuam **BASELINE**, sem promoção automática de status |
-| **DECISÃO TÉCNICA** | DT-015A, abaixo: mecanismo mínimo e fronteiras de segurança escolhidos para especificar o próximo incremento, sem autorização de implementação nesta tarefa |
+| **DECISÃO TÉCNICA** | DT-015A, abaixo: mecanismo mínimo e fronteiras de segurança escolhidos e implementados na fundação da Issue #24 |
 | **RECOMENDAÇÃO** | Medidas operacionais e sequência de entrega propostas, distintas de regra organizacional aprovada |
 | **DECISÃO DE PRODUTO PENDENTE** | DP-015B: pessoas elegíveis e autoridade organizacional para autorizar sua concessão; nenhuma resposta inferida do Estatuto |
 
-**FATO CONFIRMADO:** `origin/main` atualizada em `5b0bb8b286fb45e6ab98aa00006c24561cffddc6`, working tree inicial limpo. Não havia issues nem PRs abertos. Issues #10, #14, #16 e #20 fechadas; PRs #11, #15, #17 e #21 integrados. [CI da main](https://github.com/BrunoMNoronha/techlab-acasa/actions/runs/33763524331) verde. Fase 1 e P2-01 concluídas; P2-02 em andamento, incremento 1 entregue por [#21](https://github.com/BrunoMNoronha/techlab-acasa/pull/21).
+**FATO CONFIRMADO no início da Issue #24:** `origin/main` em `27aad5d916e073d787f3667f650c10eb6d893604`, working tree limpo, PR #23 integrado e CI da `main` verde. Fase 1 e P2-01 concluídas; P2-02 em andamento, com schema mínimo entregue por #21 e refinamento técnico entregue por #23.
 
 | Evidência versionada | Constatação |
 |---|---|
-| `src/lib/auth/identity.ts` e testes | `getClaims()` verifica identidade e retorna `{ userId }`; nenhuma capacidade administrativa |
+| `src/lib/auth/identity.ts` e `member-administration.ts` | `getClaims()` verifica identidade; o guard consulta o RPC sem receber identidade do cliente e falha fechado |
 | `src/proxy.ts`, `src/lib/supabase/proxy.ts`, `/area-restrita` | renovação/redirecionamento otimista; página revalida identidade no servidor; não é autorização de negócio |
 | `src/lib/supabase/server.ts`, `env.ts` | cliente SSR usa chave publicável e sessão do usuário; aplicação sem `service_role` |
 | `supabase/config.toml` | signup público e login anônimo desabilitados; sem Auth Hook ativo; configuração local, não prova de configuração remota |
-| migrations `20260902194500` e `20260903120000` | `membership_categories` e `members`: RLS habilitado, nenhum acesso de `anon`/`authenticated`, nenhuma policy; `members` sem FK para Auth |
-| `supabase/tests/database/*` | 12 testes de categorias e 47 de associados (59); estrutura, integridade e negação por privilégios; não há testes de autorização de operadores porque ela não existe |
+| migration `20260914190000` | `member_administrators`, RLS de leitura própria, ACL mínima e `can_manage_members()`; tabelas de negócio permanecem fechadas |
+| `supabase/tests/database/*` e integração | 59 testes anteriores preservados, 44 novos pgTAP e integração com contas fictícias, Auth/JWT/Data API reais |
 
 Não apareceu decisão posterior liberando CRUD. A divergência operacional é o uso legado de npm/`package-lock.json` no repositório frente à instrução vigente de pnpm: a Issue #22 inclui a adequação do fluxo local/CI, sem alterar versões diretas, autenticação ou migrations.
 
@@ -101,7 +101,7 @@ O grant a `authenticated` habilita a operação SQL, mas não significa acesso a
 **RECOMENDAÇÃO operacional para o próximo incremento:** provisionamento fora da aplicação, sem endpoint de bootstrap e sem segredo administrativo no app. A pessoa que administra cadastro não recebe por isso credenciais de banco nem direito de conceder privilégios.
 
 1. Antes de executar, registrar referência de aprovação, ambiente/destino, executor técnico, UUID destinatário e ação. No local usar somente conta fictícia criada pelo Studio local já documentado; conferir host/porta e identidade. Não executar este procedimento agora.
-2. Após a migration de fundação ser aprovada, usar conexão administrativa PostgreSQL local controlada (não chave `service_role`) para inserir a concessão em transação. Confirmar existência da conta pelo UUID, impedir duplicidade pela PK e registrar o resultado; não procurar automaticamente por e-mail ou “primeiro usuário”. O executor técnico é quem possui acesso operacional autorizado ao banco; **quem pode autorizar esse executor/destinatário é DP-015B**.
+2. Com a migration de fundação aprovada, usar o [procedimento local parametrizado](../operations/member-administration.md) por conexão administrativa PostgreSQL controlada (não chave `service_role` da aplicação) para inserir a concessão em transação. Confirmar existência da conta pelo UUID, impedir duplicidade pela PK e registrar o resultado; não procurar automaticamente por e-mail ou “primeiro usuário”. O executor técnico é quem possui acesso operacional autorizado ao banco; **quem pode autorizar esse executor/destinatário é DP-015B**.
 3. Confirmar o estado por leitura administrativa e testar, com a sessão do destinatário, apenas o booleano/guard da fundação. Verificar que outra conta continua negada e que `members`/categorias permanecem fechadas nessa etapa.
 4. Para revogar, conferir destino/UUID e autorização, remover exatamente a concessão em transação, verificar ausência e testar a sessão anterior sem refresh. O processo deve registrar antes/depois, horário, executor e referência de aprovação em registro operacional de acesso restrito. GitHub registra a mudança estrutural e referência da evidência, sem nomes, e-mails, tokens, senhas ou dados reais de contas.
 5. Em perda de acesso, revogar imediatamente a concessão da conta comprometida pelo canal operacional; recuperar Auth ou provisionar outra conta após aprovação e conferir novo UUID. Não recriar privilégio automaticamente por recuperação de senha, troca de e-mail ou existência de um associado.
@@ -111,7 +111,7 @@ Preview/Production exigirão tarefa própria, ambiente aprovado, credenciais ope
 
 ## 7. Threat model e testes esperados
 
-Os testes abaixo são **aceite técnico da futura implementação**, não testes já implementados. Usar anônimo, conta comum A e conta autorizada B, com dados fictícios. Asserções devem verificar ausência de dados e de mutação, não somente um código HTTP.
+Os cenários de concessão, isolamento, revogação e falha fechada aplicáveis à fundação estão implementados na Issue #24. Os cenários que exigem CRUD continuam como **aceite técnico da futura implementação**, condicionada a DP-015B. Em todos os casos, usar anônimo, conta comum A e conta autorizada B, com dados fictícios, e verificar ausência de dados/mutação, não somente código HTTP.
 
 | Cenário | Aplicação/server-side | Banco/RLS | Evidência futura |
 |---|---|---|---|
@@ -128,7 +128,7 @@ Os testes abaixo são **aceite técnico da futura implementação**, não testes
 | B tenta apagar associado ou editar catálogo | Sem fluxo autorizado | Sem grants/policies correspondentes | DELETE/TRUNCATE e escrita no catálogo rejeitados |
 | Guard autoriza, depois ocorre revogação | Tratar negação da operação seguinte | Reconsulta no comando seguinte | Teste de duas conexões: commit de revogação antes da consulta de dados |
 
-pgTAP deve também confirmar FK/PK, RLS e ACL efetiva, leitura própria sem recursão, função invoker sem argumentos de identidade, SELECT positivo de B, INSERT/UPDATE válidos de B e preservação das constraints anteriores. Executar como roles clientes com contexto de JWT explícito, não somente como dono do banco; dono/superusuário pode contornar RLS. Cobrir função direta e nenhuma concessão de EXECUTE a `PUBLIC`/`anon`.
+O pgTAP da fundação confirma FK/PK, RLS e ACL efetiva, leitura própria sem recursão, função invoker sem argumentos de identidade, predicado positivo de B, DML negado sobre concessões e preservação das constraints anteriores. Executa como roles clientes com contexto de JWT explícito, não somente como dono do banco; dono/superusuário pode contornar RLS. O futuro CRUD deverá acrescentar SELECT/INSERT/UPDATE válidos de B sobre as tabelas de negócio somente após DP-015B, mantendo EXECUTE negado a `PUBLIC`/`anon`.
 
 Testes de integração devem exercitar o JWT real pela Data API, pois definir claims manualmente em pgTAP não testa assinatura. Testes server-side devem invocar cada entrada protegida independentemente do Proxy e conferir isolamento entre sessões/cache. O incremento de fundação testa concessão/guard e preserva os 59 testes atuais; o futuro incremento de dados substituirá explicitamente as asserções de “zero policy/zero grants” pelas garantias de acesso seletivo, sem simplesmente apagar proteção para fazer a suíte passar.
 
@@ -137,7 +137,7 @@ Testes de integração devem exercitar o JWT real pela Data API, pois definir cl
 | Etapa | Entrega especificável | Gate |
 |---|---|---|
 | Este refinamento | Documento, comparação, DT-015A, pacote DP-015B e rastreabilidade | Pode integrar com pendência explícita; nenhum acesso concedido |
-| Próximo incremento: fundação mínima local | Migration só da concessão/predicado, guard sem telas de negócio, procedimento operacional parametrizado, testes fictícios positivos/negativos | Pode ser planejado tecnicamente sem nomes reais; precisa tarefa de implementação própria. Manter `members` e categorias fechadas e DP-015B pendente |
+| Fundação mínima local — Issue #24 | Migration só da concessão/predicado, guard sem telas de negócio, procedimento operacional parametrizado, testes fictícios positivos/negativos | **Implementada**; `members` e categorias continuam fechadas e DP-015B pendente |
 | Incremento seguinte de P2-02 | Cadastro, consulta e edição com proteção do servidor e banco | **DP-015B respondida**, fundação verificada e critérios de aceite do cadastro registrados; não iniciar CRUD diretamente deste refinamento |
 | P2-05 | Matriz futura, segregação de capacidades, eventual gestão de concessões | Requisitos reais aprovados; migrar concessões existentes sem ampliar direitos implicitamente |
 | P2-06 | Auditoria de operações administrativas em runtime | Permanece própria; timestamps e registro operacional não cumprem RF-007/RNF-007 |
@@ -165,4 +165,4 @@ A resposta deve identificar destinatários ou critério inequívoco de designaç
 - [PostgreSQL — CREATE FUNCTION](https://www.postgresql.org/docs/current/sql-createfunction.html): search_path seguro e retirada de EXECUTE padrão na mesma transação.
 - [PostgreSQL — Row Security Policies](https://www.postgresql.org/docs/current/ddl-rowsecurity.html): negação por padrão, owners e limites transacionais de policies com subconsultas.
 
-As escolhas e o procedimento propostos são análise específica da equipe; não foram executados contra banco nem equivalem à aprovação organizacional da ACASA.
+As escolhas foram implementadas e verificadas somente na stack local/CI. Isso não equivale à aprovação organizacional da ACASA nem provisiona pessoa real.

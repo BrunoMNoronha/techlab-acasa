@@ -92,6 +92,9 @@ jobs:
       - name: Run database tests
         run: pnpm run db:test
 
+      - name: Test member administration authorization with Auth and Data API
+        run: pnpm run test:integration:member-admin-auth
+
       - name: Stop local Supabase
         if: always()
         run: pnpm run db:stop

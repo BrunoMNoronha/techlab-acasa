@@ -22,7 +22,7 @@ Estabelecer requisitos mínimos desde o início, independentemente da stack esco
 
 ### Recorte inicial de autorização — DP-015
 
-O [refinamento de autorização administrativa](admin-authorization-refinement.md) é a fonte principal do modelo mínimo, alternativas, bootstrap, revogação, ameaças e testes futuros (Issue #22). DT-015A especifica concessão de manutenção do cadastro por UUID de Auth, guard a cada operação e RLS; **DP-015B permanece pendente** de decisão organizacional. Sem autoatribuição, vínculo com `members`, segredo administrativo na aplicação ou acesso amplo de contas autenticadas. Nenhuma proteção de banco foi alterada neste refinamento. Auditoria de runtime permanece na P2-06; evidência operacional de provisionamento não a substitui.
+O [refinamento de autorização administrativa](admin-authorization-refinement.md) é a fonte principal do modelo mínimo, alternativas, bootstrap, revogação e ameaças. A Issue #24 implementa DT-015A: concessão por UUID de Auth, RLS de leitura própria sem escrita cliente, predicado invoker e guard server-only fail-closed. Testes pgTAP e integração com Auth/JWT/Data API reais comprovam isolamento e revogação. `members` e `membership_categories` continuam fechadas. **DP-015B permanece pendente** de decisão organizacional; não há usuário real, vínculo com `members`, segredo administrativo no runtime ou acesso amplo de contas autenticadas. Auditoria de runtime permanece na P2-06.
 
 ## Dados pessoais e LGPD
 

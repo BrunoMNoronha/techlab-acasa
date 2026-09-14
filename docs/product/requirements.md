@@ -54,7 +54,7 @@
 
 ## Rastreabilidade da autorização do cadastro
 
-RF-002/RF-003 e RNF-002 permanecem BASELINE. A [Issue #22](https://github.com/BrunoMNoronha/techlab-acasa/issues/22) detalha o [recorte mínimo de autorização](../security/admin-authorization-refinement.md): DT-015A define a solução técnica; DP-015B continua pendente de designação e aprovação organizacional. Nenhuma recomendação foi promovida a requisito de negócio. CRUD administrativo permanece bloqueado; a fundação local pode ser implementada separadamente, com dados fictícios e sem liberar `members`/categorias. P2-05 mantém a matriz futura de permissões; P2-06 mantém auditoria de runtime.
+RF-002/RF-003 e RNF-002 permanecem BASELINE. O [recorte mínimo de autorização](../security/admin-authorization-refinement.md) separa DT-015A de DP-015B. A Issue #24 implementa somente a fundação técnica DT-015A, com concessão por UUID, predicado corrente, guard server-side e testes locais; `members`/categorias continuam fechadas. **DP-015B continua pendente** de designação e aprovação organizacional, portanto o CRUD administrativo permanece bloqueado. P2-05 mantém a matriz futura de permissões; P2-06 mantém auditoria de runtime.
 
 ## Dados e entidades inicialmente identificadas
 
