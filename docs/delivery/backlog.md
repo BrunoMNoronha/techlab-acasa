@@ -122,7 +122,7 @@ Este backlog organiza trabalho, mas **não transforma itens pendentes em requisi
 
 **Evidência:** Issue #14 e PR #15; CI validou aplicação e banco local, com 12/12 testes pgTAP aprovados. Nenhum ambiente remoto foi criado ou alterado.
 
-### P2-02 — Associados — EM ANDAMENTO (schema e fundação de autorização concluídos)
+### P2-02 — Associados — CONCLUÍDO (recorte do backlog: schema, fundação de autorização e cadastro administrativo mínimo)
 Cadastro, edição, consulta e validações.
 
 Inclui o **vínculo entre associado e categoria estatutária**, desmembrado da P2-01: a referência ao catálogo `membership_categories` foi criada junto da entidade `Associado`, com testes cobrindo a integridade do vínculo.
@@ -150,7 +150,7 @@ Inclui o **vínculo entre associado e categoria estatutária**, desmembrado da P
 
 #### Refinamento de autorização — Issue #22
 
-[Especificação técnica e pacote de decisão](../security/admin-authorization-refinement.md): DT-015A define concessão específica por UUID, guard server-side e RLS; **DP-015B permanece pendente** de quem pode receber acesso e quem aprova concessões/revogações. O refinamento não implementou autorização ou CRUD.
+[Especificação técnica e pacote de decisão](../security/admin-authorization-refinement.md): DT-015A define concessão específica por UUID, guard server-side e RLS; pacote DP-015B registrado para decisão organizacional.
 
 #### Incremento 2 — fundação mínima de autorização local (Issue #24) — CONCLUÍDO
 
@@ -159,17 +159,24 @@ Inclui o **vínculo entre associado e categoria estatutária**, desmembrado da P
 - guard server-only `requireMemberAdministration()` reutiliza identidade verificada, consulta o estado corrente a cada chamada e falha fechado;
 - procedimento PostgreSQL local parametrizado, sem endpoint/tela ou usuário real;
 - 44 novos testes pgTAP preservam os 59 existentes, mais integração com Auth real, JWT assinado, chave publicável e Data API;
-- `members` e `membership_categories` permanecem fechadas; nenhum CRUD foi criado e DP-015B não foi encerrada.
+- `members` e `membership_categories` permaneceram fechadas nesta etapa.
 
-#### Incremento seguinte — cadastro administrativo, pendente
+#### Incremento 3 — cadastro administrativo mínimo (Issue #26) — CONCLUÍDO
 
-**Bloqueador remanescente:**
+- Resolução formal da decisão organizacional DP-015B aprovada pelo responsável pelo produto em 2026-09-14;
+- Concessão de privilégios mínimos no banco para `authenticated` com `public.can_manage_members()`: SELECT em `members` e `membership_categories`; column grants de INSERT e UPDATE exclusivamente nas 5 colunas aprovadas (`person_type`, `name`, `membership_category_code`, `email`, `phone`) em `public.members`;
+- Bloqueio persistente e comprovado por testes contra DELETE, TRUNCATE e mutação em `id`/timestamps;
+- RLS em `members` e `membership_categories` condicionada estritamente a `public.can_manage_members()`;
+- Área administrativa implementada em `/area-restrita/associados`: listagem simples com dados aprovados, tela de cadastro em `/novo`, consulta detalhada em `/[id]` e edição em `/[id]/editar`;
+- Todas as rotas e Server Actions protegidas por `requireMemberAdministration()`, com validação estrita no servidor e fail-closed;
+- Sem exposição de PII em URLs, query strings ou logs; validação defensiva de UUID nas rotas;
+- Preservação da suíte de integração DT-015A e criação de suíte dedicada de integração ponta-a-ponta `test:integration:member-admin-crud` adicionada à CI;
+- Testes pgTAP ampliados para 136 testes e suíte Vitest ampliada para 128 testes automatizados;
+- Nenhuma funcionalidade de P2-03 (pesquisa/filtros/paginação) ou P2-04 (situação cadastral) antecipada.
 
-- **DP-015B** — destinatários e autoridade organizacional de concessão/revogação ainda não definidos. A fundação DT-015A está implementada e validada, mas não responde essa decisão. Ver [refinamento de autorização](../security/admin-authorization-refinement.md).
+**Evidência:** Issue #26 e PR correspondente; CI validou aplicação, banco local e ambas as integrações Auth/Data API.
 
-Enquanto DP-015B não for decidida, permanecem fora de entrega: CRUD administrativo, telas, listagens, formulários, Server Actions, APIs de associado e qualquer policy que libere dados de `members` ou do catálogo. **A P2-02 não pode ser declarada concluída antes disso.**
-
-**Delimitação mantida:** a P2-02 não cria coluna de situação cadastral. Estados, transições e histórico do ciclo associativo permanecem na P2-04, que deve preceder qualquer funcionalidade dependente de vínculo vigente.
+**Delimitação mantida:** a P2-02 não cria coluna de situação cadastral. Estados, transições e histórico do ciclo associativo permanecem na P2-04, que deve preceder qualquer funcionalidade dependente de vínculo vigente. Pesquisa, filtros e paginação permanecem na P2-03.
 
 ### P2-03 — Pesquisa e filtros
 Paginação e filtros necessários à operação real.

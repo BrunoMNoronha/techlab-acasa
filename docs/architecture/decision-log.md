@@ -72,7 +72,13 @@ Esta decisão não autoriza contratação de plano pago.
 
 **Status:** ACEITA E IMPLEMENTADA NA FUNDAÇÃO LOCAL, 2026-09-14, Issues #22 e #24.
 
-Concessão específica por UUID de usuário Auth, consultada no servidor e reforçada por grants mínimos/RLS. Sem papel ADMIN global, claims administrativas como fonte de verdade ou vínculo entre `members` e `auth.users`. O [ADR-0002](adr/0002-member-administration-authorization.md) registra a implementação; comparação, contrato e limites permanecem no [refinamento](../security/admin-authorization-refinement.md). DP-015B continua pendente de destinatários e autoridade organizacional; `members`/categorias continuam fechadas e o CRUD permanece bloqueado.
+Concessão específica por UUID de usuário Auth, consultada no servidor e reforçada por grants mínimos/RLS. Sem papel ADMIN global, claims administrativas como fonte de verdade ou vínculo entre `members` e `auth.users`. O [ADR-0002](adr/0002-member-administration-authorization.md) registra a implementação; comparação, contrato e limites permanecem no [refinamento](../security/admin-authorization-refinement.md).
+
+### DP-015B — Autorização administrativa do cadastro de associados
+
+**Status:** APROVADA em 2026-09-14, Issue #26.
+
+A capacidade `manage_members` é concedida individualmente por autorização da Diretoria da ACASA. O mecanismo DT-015A foi aplicado para liberar de forma seletiva o acesso a `public.members` (SELECT, column INSERT/UPDATE) e `public.membership_categories` (SELECT) via RLS condicionada a `public.can_manage_members()`, viabilizando o cadastro administrativo mínimo (P2-02, incremento 3).
 
 ## Decisões arquiteturais pendentes
 

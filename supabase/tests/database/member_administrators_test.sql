@@ -5,7 +5,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(44);
+select plan(46);
 
 -- Estrutura e integridade ----------------------------------------------------
 
@@ -278,18 +278,15 @@ select throws_ok(
   'user B cannot alter granted_at'
 );
 
-select throws_ok(
+select lives_ok(
   $$ select * from public.members $$,
-  '42501',
-  null,
-  'authorized user B still cannot read members'
+  'authorized user B can read members'
 );
 
-select throws_ok(
-  $$ select * from public.membership_categories $$,
-  '42501',
-  null,
-  'authorized user B still cannot read membership categories'
+select is(
+  (select count(*) from public.membership_categories),
+  3::bigint,
+  'authorized user B can read the 3 statutory categories'
 );
 
 reset role;
@@ -333,6 +330,18 @@ select is(
   (select count(*) from public.member_administrators),
   0::bigint,
   'revoked user B no longer sees a grant'
+);
+
+select is(
+  (select count(*) from public.members),
+  0::bigint,
+  'revoked user B sees 0 members in subsequent operation'
+);
+
+select is(
+  (select count(*) from public.membership_categories),
+  0::bigint,
+  'revoked user B sees 0 categories in subsequent operation'
 );
 
 reset role;

@@ -9,7 +9,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(47);
+select plan(69);
 
 -- ---------------------------------------------------------------------------
 -- Estrutura
@@ -351,19 +351,13 @@ select lives_ok(
 );
 
 -- ---------------------------------------------------------------------------
--- Segurança
+-- ---------------------------------------------------------------------------
+-- Segurança, Grants de Coluna, RLS e Revogação (DP-015B / Issue #26)
 -- ---------------------------------------------------------------------------
 
 select ok(
   (select relrowsecurity from pg_class where oid = 'public.members'::regclass),
   'row level security is enabled'
-);
-
-select is(
-  (select count(*) from pg_policies
-    where schemaname = 'public' and tablename = 'members'),
-  0::bigint,
-  'no permissive policy was introduced (deny by default while DP-015 is open)'
 );
 
 select ok(
@@ -372,18 +366,225 @@ select ok(
     'public.members',
     'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER'
   ),
-  'anon has no direct table privilege (read or write)'
+  'anon has no direct table privilege'
 );
 
 select ok(
-  not has_table_privilege(
-    'authenticated',
-    'public.members',
-    'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER'
-  ),
-  'authenticated has no direct table privilege (read or write)'
+  has_table_privilege('authenticated', 'public.members', 'SELECT'),
+  'authenticated has SELECT privilege on members'
 );
+
+select ok(
+  has_column_privilege('authenticated', 'public.members', 'name', 'INSERT')
+  and has_column_privilege('authenticated', 'public.members', 'person_type', 'INSERT')
+  and has_column_privilege('authenticated', 'public.members', 'membership_category_code', 'INSERT')
+  and has_column_privilege('authenticated', 'public.members', 'email', 'INSERT')
+  and has_column_privilege('authenticated', 'public.members', 'phone', 'INSERT'),
+  'authenticated has INSERT on approved business columns'
+);
+
+select ok(
+  has_column_privilege('authenticated', 'public.members', 'name', 'UPDATE')
+  and has_column_privilege('authenticated', 'public.members', 'person_type', 'UPDATE')
+  and has_column_privilege('authenticated', 'public.members', 'membership_category_code', 'UPDATE')
+  and has_column_privilege('authenticated', 'public.members', 'email', 'UPDATE')
+  and has_column_privilege('authenticated', 'public.members', 'phone', 'UPDATE'),
+  'authenticated has UPDATE on approved business columns'
+);
+
+select ok(
+  not has_column_privilege('authenticated', 'public.members', 'id', 'INSERT')
+  and not has_column_privilege('authenticated', 'public.members', 'id', 'UPDATE')
+  and not has_column_privilege('authenticated', 'public.members', 'created_at', 'INSERT')
+  and not has_column_privilege('authenticated', 'public.members', 'created_at', 'UPDATE')
+  and not has_column_privilege('authenticated', 'public.members', 'updated_at', 'INSERT')
+  and not has_column_privilege('authenticated', 'public.members', 'updated_at', 'UPDATE'),
+  'authenticated has no write privilege on id, created_at, updated_at'
+);
+
+select ok(
+  not has_table_privilege('authenticated', 'public.members', 'DELETE, TRUNCATE, REFERENCES, TRIGGER'),
+  'authenticated has no DELETE, TRUNCATE, REFERENCES or TRIGGER privileges'
+);
+
+select is(
+  (select count(*) from pg_policies where schemaname = 'public' and tablename = 'members'),
+  3::bigint,
+  'exactly 3 policies exist on members (SELECT, INSERT, UPDATE)'
+);
+
+select ok(
+  (select qual ilike '%can_manage_members%'
+   from pg_policies
+   where schemaname = 'public' and tablename = 'members' and cmd = 'SELECT'),
+  'SELECT policy requires can_manage_members()'
+);
+
+select ok(
+  (select with_check ilike '%can_manage_members%'
+   from pg_policies
+   where schemaname = 'public' and tablename = 'members' and cmd = 'INSERT'),
+  'INSERT policy requires can_manage_members()'
+);
+
+select ok(
+  (select qual ilike '%can_manage_members%' and with_check ilike '%can_manage_members%'
+   from pg_policies
+   where schemaname = 'public' and tablename = 'members' and cmd = 'UPDATE'),
+  'UPDATE policy requires can_manage_members() on both USING and WITH CHECK'
+);
+
+-- Fixtures de identidades para testes de RLS
+insert into auth.users (id, email)
+values
+  ('11111111-1111-4111-8111-111111111111', 'usuario-a@example.invalid'),
+  ('22222222-2222-4222-8222-222222222222', 'usuario-b@example.invalid');
+
+insert into public.member_administrators (user_id)
+values
+  ('22222222-2222-4222-8222-222222222222');
+
+-- Usuário comum A (sem manage_members)
+set local role authenticated;
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}',
+  true
+);
+
+select is(
+  (select count(*) from public.members),
+  0::bigint,
+  'unauthorized user A sees zero member rows'
+);
+
+select throws_ok(
+  $$ insert into public.members (person_type, name, membership_category_code)
+     values ('PF', 'Invasor A', 'CONTRIBUINTE') $$,
+  '42501',
+  null,
+  'unauthorized user A insert is rejected'
+);
+
+update public.members set name = 'Alterado por A';
+
+select is(
+  (select count(*) from public.members where name = 'Alterado por A'),
+  0::bigint,
+  'unauthorized user A update alters zero rows'
+);
+
+select throws_ok(
+  $$ delete from public.members $$,
+  '42501',
+  null,
+  'unauthorized user A delete is rejected by ACL'
+);
+
+-- Usuário B (autorizado com manage_members)
+reset role;
+set local role authenticated;
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"22222222-2222-4222-8222-222222222222","role":"authenticated"}',
+  true
+);
+
+select ok(
+  (select count(*) from public.members) > 0,
+  'authorized user B can read member rows'
+);
+
+select lives_ok(
+  $$ insert into public.members (person_type, name, membership_category_code, email)
+     values ('PF', 'Associado Criado Por B', 'CONTRIBUINTE', 'b@example.invalid') $$,
+  'authorized user B can insert a member'
+);
+
+select lives_ok(
+  $$ update public.members
+     set name = 'Associado Alterado Por B'
+     where name = 'Associado Criado Por B' $$,
+  'authorized user B can update an allowed column'
+);
+
+select throws_ok(
+  $$ delete from public.members where name = 'Associado Alterado Por B' $$,
+  '42501',
+  null,
+  'authorized user B cannot delete members (no DELETE privilege)'
+);
+
+select throws_ok(
+  $$ truncate public.members $$,
+  '42501',
+  null,
+  'authorized user B cannot truncate members (no TRUNCATE privilege)'
+);
+
+select throws_ok(
+  $$ insert into public.members (id, person_type, name, membership_category_code)
+     values ('99999999-9999-4999-8999-999999999999'::uuid, 'PF', 'Tentativa ID', 'CONTRIBUINTE') $$,
+  '42501',
+  null,
+  'authorized user B has no insert privilege on id'
+);
+
+select throws_ok(
+  $$ update public.members
+     set id = '99999999-9999-4999-8999-999999999999'::uuid
+     where name = 'Associado Alterado Por B' $$,
+  '42501',
+  null,
+  'authorized user B has no update privilege on id'
+);
+
+select throws_ok(
+  $$ update public.members
+     set updated_at = now()
+     where name = 'Associado Alterado Por B' $$,
+  '42501',
+  null,
+  'authorized user B has no update privilege on updated_at'
+);
+
+-- Revogação administrativa e nova operação com o mesmo JWT de B
+reset role;
+delete from public.member_administrators
+where user_id = '22222222-2222-4222-8222-222222222222';
+
+set local role authenticated;
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"22222222-2222-4222-8222-222222222222","role":"authenticated"}',
+  true
+);
+
+select is(
+  (select count(*) from public.members),
+  0::bigint,
+  'revoked user B sees zero member rows with same JWT'
+);
+
+select throws_ok(
+  $$ insert into public.members (person_type, name, membership_category_code)
+     values ('PF', 'Tentativa Pos Revogacao', 'CONTRIBUINTE') $$,
+  '42501',
+  null,
+  'revoked user B insert is rejected with same JWT'
+);
+
+update public.members set name = 'Tentativa Update Pos Revogacao' where name = 'Associado Alterado Por B';
+
+select is(
+  (select count(*) from public.members where name = 'Tentativa Update Pos Revogacao'),
+  0::bigint,
+  'revoked user B update alters zero rows with same JWT'
+);
+
+reset role;
 
 select * from finish();
 
 rollback;
+

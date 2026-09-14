@@ -1,8 +1,8 @@
 # Autorização administrativa mínima de associados — DP-015
 
 - **Data:** 2026-09-14.
-- **Rastreabilidade:** [Issue #22](https://github.com/BrunoMNoronha/techlab-acasa/issues/22), [Issue #24](https://github.com/BrunoMNoronha/techlab-acasa/issues/24), RF-002/RF-003/RNF-002, P2-02 ↔ P2-05, D13.
-- **Status:** DT-015A implementada na fundação local; **DP-015B permanece PENDENTE**. Nenhum acesso real ou CRUD foi concedido.
+- **Rastreabilidade:** [Issue #22](https://github.com/BrunoMNoronha/techlab-acasa/issues/22), [Issue #24](https://github.com/BrunoMNoronha/techlab-acasa/issues/24), [Issue #26](https://github.com/BrunoMNoronha/techlab-acasa/issues/26), RF-002/RF-003/RNF-002, P2-02 ↔ P2-05, D13.
+- **Status:** DT-015A implementada na fundação local; **DP-015B APROVADA** pelo responsável pelo produto em 2026-09-14. Cadastro administrativo desbloqueado para o escopo mínimo da P2-02.
 - **Fonte principal:** este documento especifica autorização; campos e decisões já aprovados permanecem em [member-model-refinement.md, §0](../product/member-model-refinement.md).
 
 ## 1. Evidência e classificação
@@ -34,9 +34,9 @@ Não apareceu decisão posterior liberando CRUD. A divergência operacional é o
 
 O nome conceitual da capacidade é `manage_members`; não é novo papel organizacional, enum de perfis nem framework de permissões. Evitar `ADMIN` global: permitir administrar cadastro não implica administrar o sistema. A tabela conceitual `public.member_administrators` representa somente quem tem essa capacidade, admitindo zero ou várias contas. Os nomes físicos serão confirmados na migration do incremento futuro.
 
-**DP-015B — DECISÃO DE PRODUTO PENDENTE:** quem a ACASA autoriza a receber essa capacidade e quem registra a aprovação de concessões/revogações. RB-004 atribui competência associativa à Diretoria, mas não define delegação de manutenção de dados. Não criar papéis de Presidente, Diretor, Secretário ou Tesoureiro por inferência.
+**DP-015B — DECISÃO DE PRODUTO APROVADA (2026-09-14):** A capacidade `manage_members` poderá ser concedida exclusivamente a pessoas individualmente designadas pela ACASA para manutenção cadastral. A concessão e a revogação dependem de autorização da Diretoria da ACASA, devidamente referenciada no procedimento operacional. Cargo, função ou simples participação na Diretoria ou em qualquer outro órgão da associação não concede acesso automaticamente. O executor técnico autorizado realiza a concessão ou revogação, mas não possui autoridade para decidir quem deve recebê-la. `manage_members` autoriza somente a consulta, cadastro e edição dos dados mínimos pertencentes à P2-02. Essa capacidade não concede, por implicação, poderes para admissão/desligamento de associados, situação cadastral, financeiro, solicitações de ingresso, gestão de usuários, concessão de permissões ou qualquer outro domínio. Eventuais níveis diferentes de acesso ou matriz mais ampla de permissões permanecem para a P2-05.
 
-**DP-015 é a decisão agregadora e continua aberta.** Resolver DT-015A não resolve DP-015B nem libera CRUD ou acesso real. O merge deste refinamento registra uma decisão técnica, não uma aprovação organizacional.
+**DP-015 foi resolvida integralmente** (DT-015A como fundação técnica e DP-015B como decisão organizacional), desbloqueando o incremento 3 da P2-02 (cadastro administrativo).
 
 ## 3. Alternativas avaliadas
 
@@ -144,15 +144,25 @@ Testes de integração devem exercitar o JWT real pela Data API, pois definir cl
 
 Ao evoluir para P2-05, manter um contrato de consulta de capacidade e migrar explicitamente as concessões para o modelo aprovado, preservando revogação e testes. Não conceder por herança acesso financeiro, ingresso ou gestão de usuários aos destinatários atuais. A proteção por campo, se necessária, exige novo refinamento; o recorte proposto é indivisível apenas para os dados mínimos já aprovados.
 
-## 9. Pacote enxuto de decisão da ACASA
+## 9. Pacote de decisão da ACASA — DP-015B (Aprovado em 2026-09-14)
 
-**DECISÃO DE PRODUTO PENDENTE — DP-015B:**
+A decisão organizacional **DP-015B** foi formalmente aprovada pelo responsável pelo produto em 2026-09-14 (Issue #26):
 
-> Quem poderá receber acesso para consultar, cadastrar e editar os dados mínimos de todos os associados (incluindo sua categoria, sem decidir admissão/desligamento), e quem na ACASA autoriza a concessão ou revogação desse acesso?
+> A capacidade `manage_members` poderá ser concedida exclusivamente a pessoas individualmente designadas pela ACASA para manutenção cadastral.
+>
+> A concessão e a revogação dependem de autorização da Diretoria da ACASA, devidamente referenciada no procedimento operacional.
+>
+> Cargo, função ou simples participação na Diretoria ou em qualquer outro órgão da associação não concede acesso automaticamente.
+>
+> O executor técnico autorizado realiza a concessão ou revogação, mas não possui autoridade para decidir quem deve recebê-la.
+>
+> `manage_members` autoriza somente a consulta, cadastro e edição dos dados mínimos pertencentes à P2-02.
+>
+> Essa capacidade não concede, por implicação, poderes para admissão/desligamento de associados, situação cadastral, financeiro, solicitações de ingresso, gestão de usuários, concessão de permissões ou qualquer outro domínio.
+>
+> Eventuais níveis diferentes de acesso ou matriz mais ampla de permissões permanecem para a P2-05.
 
-A resposta deve identificar destinatários ou critério inequívoco de designação e responsável organizacional pela aprovação. Identificadores de contas reais serão conferidos em registro operacional restrito, não na documentação pública. Não se pergunta à ACASA sobre tabela, SQL, claims ou RLS: DT-015A resolve essas escolhas. Se os destinatários precisarem de acessos diferentes ao cadastro, registrar essa necessidade antes de implementar o recorte único; não inventar a matriz.
-
-**Condição de fechamento:** registrar resposta explícita com referência de aprovação, atualizar DP-015B e o gate de P2-02. A issue de refinamento pode fechar sem fechar DP-015. Nenhuma ausência de resposta significa aprovação.
+Com esta aprovação e a fundação DT-015A já consolidada, a decisão agregadora **DP-015 está resolvida**, autorizando a liberação do cadastro administrativo mínimo da P2-02 com proteção completa no servidor e no banco de dados.
 
 ## 10. Fontes oficiais consultadas em 2026-09-14
 

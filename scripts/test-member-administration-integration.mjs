@@ -163,14 +163,22 @@ async function main() {
       "B conseguiu alterar granted_at",
     );
 
-    checkPermissionDenied(
-      await authorized.from("members").select("id"),
-      "B conseguiu consultar members",
-    );
-    checkPermissionDenied(
-      await authorized.from("membership_categories").select("code"),
-      "B conseguiu consultar membership_categories",
-    );
+    // Conta comum A não enxerga dados em members nem categories (retorna zero linhas)
+    const commonMembers = await common.from("members").select("id");
+    checkNoError(commonMembers, "leitura de members por A falhou");
+    check(commonMembers.data.length === 0, "A enxergou linhas em members");
+
+    const commonCategories = await common.from("membership_categories").select("code");
+    checkNoError(commonCategories, "leitura de categories por A falhou");
+    check(commonCategories.data.length === 0, "A enxergou categorias estatutárias");
+
+    // Conta autorizada B consegue consultar members e categories
+    const authorizedMembers = await authorized.from("members").select("id");
+    checkNoError(authorizedMembers, "B não conseguiu consultar members");
+
+    const authorizedCategories = await authorized.from("membership_categories").select("code");
+    checkNoError(authorizedCategories, "B não conseguiu consultar membership_categories");
+    check(authorizedCategories.data.length === 3, "B não enxergou as 3 categorias estatutárias");
 
     const revoke = await admin
       .from("member_administrators")
@@ -192,6 +200,14 @@ async function main() {
       revokedPredicate.data === false,
       "B continuou autorizado após revogação em nova operação com o mesmo JWT",
     );
+
+    const membersAfterRevocation = await authorized.from("members").select("id");
+    checkNoError(membersAfterRevocation, "leitura de members pós-revogação falhou");
+    check(membersAfterRevocation.data.length === 0, "B enxergou members após revogação");
+
+    const categoriesAfterRevocation = await authorized.from("membership_categories").select("code");
+    checkNoError(categoriesAfterRevocation, "leitura de categories pós-revogação falhou");
+    check(categoriesAfterRevocation.data.length === 0, "B enxergou categories após revogação");
 
     console.log(
       `Integração Auth/JWT/Data API: ${checks} verificações passaram com fixtures locais efêmeras.`,

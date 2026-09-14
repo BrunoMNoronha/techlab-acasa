@@ -111,6 +111,10 @@ pnpm exec supabase status
 | `/auth/callback` | Callback PKCE que troca o código recebido por sessão. |
 | `/redefinir-senha` | Definição de nova senha (exige sessão de recuperação válida). |
 | `/area-restrita` | Rota autenticada de demonstração, com validação server-side própria e logout. |
+| `/area-restrita/associados` | Listagem administrativa simples de associados para operadores com `manage_members`. |
+| `/area-restrita/associados/novo` | Formulário administrativo para cadastro de novos associados. |
+| `/area-restrita/associados/[id]` | Visualização detalhada do cadastro mínimo do associado. |
+| `/area-restrita/associados/[id]/editar` | Formulário administrativo de edição dos dados mínimos do associado. |
 
 ### Regras da configuração local (`supabase/config.toml`)
 
@@ -198,14 +202,22 @@ Documentos prioritários:
 
 ## Refinamento da autorização administrativa
 
-A [Issue #22](https://github.com/BrunoMNoronha/techlab-acasa/issues/22) separou DT-015A (decisão técnica) de **DP-015B, ainda pendente** (quem recebe acesso e quem autoriza concessões/revogações na ACASA). A Issue #24 implementa a fundação DT-015A: concessão específica por UUID, RLS/ACL de leitura própria, predicado corrente, guard server-only e testes com Auth/JWT/Data API locais. Nenhuma pessoa real recebeu acesso.
+A [Issue #22](https://github.com/BrunoMNoronha/techlab-acasa/issues/22) separou DT-015A (decisão técnica) de **DP-015B** (governança organizacional de quem recebe acesso e quem autoriza concessões/revogações na ACASA).
 
-`public.members` e `public.membership_categories` continuam fechadas e não existe CRUD. O bloqueador técnico foi removido, mas o CRUD continua bloqueado exclusivamente pela decisão organizacional DP-015B. P2-05 mantém a matriz futura e P2-06 a auditoria de runtime.
+- A [Issue #24](https://github.com/BrunoMNoronha/techlab-acasa/issues/24) implementou a fundação técnica DT-015A (incremento 2 da P2-02): tabela de concessões específicas por UUID (`public.member_administrators`), RLS/ACL de leitura própria, predicado corrente `public.can_manage_members()`, guard server-only fail-closed (`requireMemberAdministration()`) e testes com Auth/JWT/Data API locais.
+- A decisão organizacional **DP-015B foi aprovada formalmente em 2026-09-14** pelo responsável pelo produto e registrada em [`docs/delivery/risks-decisions.md`](docs/delivery/risks-decisions.md).
+- A [Issue #26](https://github.com/BrunoMNoronha/techlab-acasa/issues/26) entregou o **incremento 3 da P2-02**: liberação seletiva de privilégios (`SELECT` em `public.membership_categories`; `SELECT` e `INSERT`/`UPDATE` coluna a coluna nos campos de negócio de `public.members` condicionados a `public.can_manage_members()`) e implementação completa do cadastro administrativo mínimo (listagem simples, criação, detalhes e edição) sob `/area-restrita/associados`. P2-05 mantém a matriz futura de perfis e P2-06 a auditoria de runtime.
 
 ## Próximos passos
 
-Com a Fase 1 (fundação técnica) concluída e o catálogo de categorias estatutárias formalizado (P2-01), o cadastro de associados (P2-02) está **em andamento**. O responsável pelo produto aprovou o pacote de decisão do refinamento — consolidado em [`docs/product/member-model-refinement.md`](docs/product/member-model-refinement.md), §0 —, resolvendo DP-013, DP-014, a parcela de DP-008 relativa ao cadastro administrativo mínimo e a parcela de DP-005 que separa a P2-02 da P2-04.
+Com a entrega do incremento 3 da P2-02, o cadastro administrativo mínimo de associados está funcional e protegido para operadores com a capacidade `manage_members`.
 
-O **incremento 1** está entregue: a migration `supabase/migrations/20260903120000_create_members.sql` cria `public.members` como entidade única com tipo de pessoa (`PF`/`PJ`), chave primária `uuid`, `name` obrigatório, categoria estatutária obrigatória por chave estrangeira, `email` e `phone` opcionais e RLS habilitado sem policy, com `anon` e `authenticated` sem privilégio. Nenhum outro dado pessoal foi coletado e não existe situação cadastral nem vínculo com `auth.users`.
+Permanece no backlog e em decisões futuras:
+- **P2-03**: listagem avançada com filtros, busca e paginação dinâmica;
+- **P2-04**: situação cadastral (`ATIVO`, `INATIVO`, `SUSPENSO`, `DESLIGADO`), histórico de transição e regras estatutárias de desativação (DP-005);
+- **P2-05**: perfis e permissões administrativas adicionais;
+- **P2-06**: trilha de auditoria estruturada em runtime;
+- **P2-08 / P2-09**: autoatendimento, portal do associado e inscrição pública (DP-008);
+- **DP-006A**: decisão sobre importação de cadastro legado.
 
-A fundação técnica da capacidade `manage_members` está pronta, mas a parte **utilizável** da P2-02 — CRUD administrativo, telas, pesquisa e Server Actions — continua bloqueada por **DP-015B**: a ACASA ainda precisa definir destinatários e autoridade para concessão/revogação. Também permanecem abertas DP-006A (existência de cadastro legado a importar), DP-008 na parcela da inscrição pública (P2-08/P2-09) e DP-005 para a situação cadastral (P2-04). Perfis/permissões administrativas (P2-05) dependem de decisões ainda registradas como pendentes. Os ambientes Preview/Production ainda não existem e sua criação exige tarefa específica e decisão de custo. Entidades e campos de negócio só devem ser adicionados quando suas regras estiverem suficientemente definidas.
+Remoção física (`DELETE`) permanece expressamente não autorizada por ACL e sem fluxo na aplicação. Os ambientes Preview/Production ainda não existem e sua criação exige tarefa específica e decisão de custo. Entidades e campos de negócio só devem ser adicionados quando suas regras estiverem suficientemente definidas.

@@ -95,6 +95,9 @@ jobs:
       - name: Test member administration authorization with Auth and Data API
         run: pnpm run test:integration:member-admin-auth
 
+      - name: Test member administration CRUD with Auth and Data API
+        run: pnpm run test:integration:member-admin-crud
+
       - name: Stop local Supabase
         if: always()
         run: pnpm run db:stop
