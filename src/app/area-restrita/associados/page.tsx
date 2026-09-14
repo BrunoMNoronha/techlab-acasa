@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { requireMemberAdministration } from "@/lib/auth/member-administration";
 import { getMembershipCategories, listMembers } from "@/lib/members/repository";
 import { normalizeMemberListParams } from "@/lib/members/validation";
@@ -45,9 +46,21 @@ export default async function AssociadosPage({ searchParams }: AssociadosPagePro
     getMembershipCategories(),
   ]);
 
-  const categoryMap = new Map(categories.map((c) => [c.code, c.name]));
   const { items: members, page, totalCount, totalPages } = result;
 
+  // Redirecionamento canônico: quando há registros (totalCount > 0) e a página solicitada
+  // excede totalPages, redireciona para a última página válida preservando os filtros.
+  if (totalCount > 0 && page > totalPages) {
+    const canonicalQuery = buildQueryString({
+      q: listParams.q,
+      personType: listParams.personType,
+      category: listParams.category,
+      page: totalPages,
+    });
+    redirect(`/area-restrita/associados${canonicalQuery}`);
+  }
+
+  const categoryMap = new Map(categories.map((c) => [c.code, c.name]));
   const hasActiveFilters = Boolean(listParams.q || listParams.personType || listParams.category);
 
   const prevQuery = buildQueryString({

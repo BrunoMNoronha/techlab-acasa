@@ -142,16 +142,21 @@ export function normalizeMemberListParams(
     }
   }
 
-  // 4. Página
+  // 4. Página (validação estrita: apenas inteiro seguro >= 1; sem decimais ou partes alfabéticas)
   let page = 1;
   if (raw.page !== undefined && raw.page !== null) {
-    const parsed =
-      typeof raw.page === "number"
-        ? Math.floor(raw.page)
-        : parseInt(String(raw.page).trim(), 10);
-
-    if (Number.isFinite(parsed) && parsed >= 1) {
-      page = parsed;
+    if (typeof raw.page === "number") {
+      if (Number.isSafeInteger(raw.page) && raw.page >= 1) {
+        page = raw.page;
+      }
+    } else if (typeof raw.page === "string") {
+      const trimmed = raw.page.trim();
+      if (/^[1-9]\d*$/.test(trimmed)) {
+        const parsed = Number(trimmed);
+        if (Number.isSafeInteger(parsed) && parsed >= 1) {
+          page = parsed;
+        }
+      }
     }
   }
 

@@ -73,14 +73,15 @@ describe("members repository", () => {
       expect(categories[0].code).toBe("BENEMERITO");
     });
 
-    it("retorna lista vazia em caso de erro", async () => {
+    it("propaga erro sanitizado em caso de falha no banco", async () => {
       mockOrder.mockResolvedValueOnce({
         data: null,
         error: { message: "Database connection failed" },
       });
 
-      const categories = await getMembershipCategories();
-      expect(categories).toEqual([]);
+      await expect(getMembershipCategories()).rejects.toThrow(
+        "Falha ao consultar catálogo de categorias estatutárias.",
+      );
     });
   });
 
@@ -198,22 +199,16 @@ describe("members repository", () => {
       expect(result.totalPages).toBe(3); // ceil(60 / 25) = 3
     });
 
-    it("retorna resultado seguro e vazio em caso de erro na consulta", async () => {
+    it("propaga erro sanitizado em caso de falha na consulta", async () => {
       mockRange.mockResolvedValueOnce({
         data: null,
         count: null,
         error: { message: "Query error" },
       });
 
-      const result = await listMembers({ page: 2 });
-
-      expect(result).toEqual({
-        items: [],
-        page: 2,
-        pageSize: 25,
-        totalCount: 0,
-        totalPages: 1,
-      });
+      await expect(listMembers({ page: 2 })).rejects.toThrow(
+        "Falha ao consultar listagem de associados.",
+      );
     });
   });
 });

@@ -9,7 +9,9 @@
  *
  * Política de minimização (allow-list): apenas os campos declarados em
  * `LOG_CONTEXT_FIELDS` são serializados. Objetos de request, headers, cookies,
- * erros, usuário, claims ou `process.env` nunca devem ser passados ao logger.
+ * erros, usuário, claims, query strings ou `process.env` nunca devem ser passados ao logger.
+ * Especialmente, termos de busca textual (`q`) podem conter dados pessoais (nomes de associados)
+ * e são estritamente vedados nos eventos de log.
  */
 
 export type LogLevel = "info" | "warn" | "error";
@@ -17,7 +19,7 @@ export type LogLevel = "info" | "warn" | "error";
 /**
  * Contexto permitido em um evento de log. Todos os campos são opcionais e
  * limitados a primitivos. Não adicione aqui campos que possam carregar
- * segredos ou dados pessoais (e-mail, token, cookie, path concreto, body).
+ * segredos ou dados pessoais (e-mail, token, cookie, path concreto, query string/q, body).
  */
 export type LogContext = {
   /** Método HTTP (GET, POST...). */
