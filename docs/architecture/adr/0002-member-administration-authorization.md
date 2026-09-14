@@ -22,6 +22,17 @@ O estado de autorização permanece pequeno, relacional e imediatamente revogáv
 
 Esta fundação não concede acesso de negócio: `members` e `membership_categories` continuam sem privilégios/policies para operadores. Não existe CRUD, usuário real, ambiente remoto ou segredo administrativo no runtime.
 
-## Decisão pendente preservada
+## Decisão pendente preservada no desenho original
 
 **DP-015B ainda precisa definir quem, na ACASA, pode receber `manage_members` e quem possui autoridade organizacional para aprovar concessão/revogação.** Até essa resposta, o CRUD da P2-02 continua bloqueado.
+
+## Atualização — Aprovação de DP-015B (2026-09-14, Issue #26)
+
+Em 2026-09-14, o responsável pelo produto aprovou a decisão organizacional DP-015B:
+- A capacidade `manage_members` é concedida exclusivamente a pessoas individualmente designadas pela ACASA para manutenção cadastral;
+- Concessão e revogação dependem de autorização da Diretoria da ACASA, com referência documental;
+- Cargo ou função na associação não confere acesso automático;
+- O executor técnico apenas operacionaliza a concessão/revogação autorizada;
+- A capacidade autoriza exclusivamente o cadastro mínimo da P2-02.
+
+Com isso, a fundação técnica DT-015A passa a governar o acesso efetivo a `public.members` e `public.membership_categories` via grants mínimos de coluna/tabela e policies RLS condicionadas a `public.can_manage_members()`.

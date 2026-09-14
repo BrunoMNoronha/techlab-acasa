@@ -2,7 +2,7 @@
 
 Este procedimento é exclusivo da stack Supabase local e implementa a operação técnica da DT-015A. Ele não autoriza destinatários reais, não cria endpoint/tela e não usa a chave `service_role` da aplicação.
 
-> **DP-015B ainda precisa definir quem, na ACASA, pode receber `manage_members` e quem possui autoridade organizacional para aprovar concessão/revogação.**
+> **DP-015B (Aprovada em 2026-09-14):** A capacidade `manage_members` é concedida exclusivamente a pessoas individualmente designadas pela ACASA para manutenção cadastral, dependendo de autorização da Diretoria devidamente referenciada. O executor técnico realiza a concessão ou revogação, mas não possui autoridade para decidir destinatários.
 
 Use somente conta fictícia local e uma conexão PostgreSQL administrativa controlada. Não copie UUIDs para Preview/Production, não procure conta por e-mail e não selecione automaticamente o primeiro usuário.
 

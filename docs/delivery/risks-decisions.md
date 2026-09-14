@@ -24,6 +24,13 @@ O responsável pelo produto aprovou o pacote de decisão do refinamento da P2-02
 
 Decisões técnicas correlatas registradas na mesma revisão, dentro da regra de escalonamento: identificador técnico `uuid` opaco e imutável (D14), mecânica da chave estrangeira da categoria (D11) e desacoplamento entre `members` e `auth.users` (D13).
 
+## Decisões resolvidas em 2026-09-14
+
+| ID | Decisão | Resultado |
+|---|---|---|
+| DT-015A | Mecanismo mínimo de autorização para o cadastro de associados | Concessão específica da capacidade `manage_members` por UUID em `public.member_administrators`, validada no servidor via `requireMemberAdministration()` e protegida por RLS e ACL mínimas (ADR-0002, Issue #24). |
+| DP-015B | Destinatários da capacidade `manage_members` e autoridade de governança | **APROVADA** pelo responsável pelo produto em 2026-09-14 (Issue #26). A capacidade `manage_members` poderá ser concedida exclusivamente a pessoas individualmente designadas pela ACASA para manutenção cadastral. A concessão e a revogação dependem de autorização da Diretoria da ACASA, devidamente referenciada no procedimento operacional. Cargo, função ou simples participação na Diretoria ou em qualquer outro órgão da associação não concede acesso automaticamente. O executor técnico autorizado realiza a concessão ou revogação, mas não possui autoridade para decidir quem deve recebê-la. `manage_members` autoriza somente a consulta, cadastro e edição dos dados mínimos pertencentes à P2-02. Essa capacidade não concede, por implicação, poderes para admissão/desligamento de associados, situação cadastral, financeiro, solicitações de ingresso, gestão de usuários, concessão de permissões ou qualquer outro domínio. Eventuais níveis diferentes de acesso ou matriz mais ampla de permissões permanecem para a P2-05. |
+
 ## Decisões prioritárias ainda abertas
 
 | ID | Decisão | Por que importa | Bloqueia |
@@ -31,15 +38,10 @@ Decisões técnicas correlatas registradas na mesma revisão, dentro da regra de
 | DP-005 | Confirmar a normalização operacional da situação cadastral e fluxo de recurso/readmissão | o Estatuto define eventos do vínculo, mas não enumera estados de sistema | situação cadastral (P2-04). **Não bloqueia mais o schema da P2-02** |
 | DP-006A | Existem cadastros de associados a migrar? | histórico de pagamentos não será migrado, mas outros dados ainda não foram inventariados | plano de migração de cadastro. **Não bloqueia mais a obrigatoriedade da categoria**: se houver cadastro legado sem categoria conhecida, a importação deve resolver a inconsistência antes da persistência definitiva ou usar staging próprio, em vez de enfraquecer a integridade do domínio |
 | DP-008 | Quais campos/documentos são obrigatórios na **inscrição pública** e qual a finalidade de cada dado? | define formulário, LGPD, validações e storage | implementação do ingresso (P2-08/P2-09). **Resolvida para o cadastro administrativo mínimo da P2-02**; decomposta campo a campo em `../product/member-model-refinement.md` |
-| DP-015 | **PENDENTE — parcela DP-015B:** quem pode receber a capacidade de manter o cadastro e quem na ACASA autoriza concessões/revogações? | DT-015A está implementada na fundação da Issue #24: concessão específica por UUID, consultada no servidor e protegida por RLS; não define destinatários nem libera tabelas de negócio | **entrega utilizável da P2-02**: CRUD, telas e Server Actions. O bloqueador técnico foi removido; resta a decisão organizacional DP-015B. Fonte: [refinamento](../security/admin-authorization-refinement.md) |
 | DP-009 | Quais são os estados da solicitação de associação e quais perfis operacionalizam a análise/aprovação? | o Estatuto atribui à Diretoria competência para admitir/demitir; falta detalhar o workflow de sistema | implementação do ingresso |
 | DP-010 | Quais regras reais de cobrança, competência, vencimento e adimplência? | define modelo financeiro e indicadores | financeiro |
 | DP-011 | Quais estados e motivos de análise de comprovante serão usados? | define workflow e auditoria | comprovantes |
 | DP-012 | Qual sistema operacional predomina no desenvolvimento local? | ajusta scripts/instruções; não bloqueia stack | apenas documentação operacional. **Impacto reduzido** na Issue #18: o repositório passou a normalizar fim de linha para LF via `.gitattributes`, com verificação `pnpm run check:eol` local e na CI, de modo que migrations, scripts e workflows não dependem mais do sistema operacional de quem contribui. A decisão permanece aberta somente para eventuais instruções operacionais específicas. |
-
-## Parcela técnica de DP-015 — 2026-09-14
-
-**DT-015A — DECISÃO TÉCNICA IMPLEMENTADA NA FUNDAÇÃO:** mecanismo mínimo especificado no [refinamento de autorização](../security/admin-authorization-refinement.md), §§2–7, implementado pela Issue #24 e registrado no ADR-0002. **DP-015B — DECISÃO DE PRODUTO PENDENTE:** pacote de decisão na §9. Nenhum órgão estatutário foi convertido automaticamente em papel de sistema; nenhuma pessoa real recebeu acesso.
 
 ## Evidências recebidas
 
