@@ -140,7 +140,7 @@ pnpm run check:secrets
 pnpm run check:eol
 pnpm run lint
 pnpm run typecheck
-pnpm test
+pnpm run test
 pnpm run build
 ```
 
