@@ -42,7 +42,7 @@ Este backlog organiza trabalho, mas **não transforma itens pendentes em requisi
 
 **Pendente não bloqueador:** sistema operacional predominante para ajustar documentação operacional (DP-012).
 
-**Neutralidade de ambiente (Issue #18):** o repositório normaliza fim de linha para LF pelo `.gitattributes` e verifica essa normalização com `npm run check:eol`, local e na CI. Migrations SQL, scripts e workflows passam a ser idênticos em qualquer sistema operacional, preservando a garantia de que `npm run db:reset` reproduz o banco do zero. Nenhuma regra de negócio foi afetada.
+**Neutralidade de ambiente (Issue #18):** o repositório normaliza fim de linha para LF pelo `.gitattributes` e verifica essa normalização com `pnpm run check:eol`, local e na CI. Migrations SQL, scripts e workflows passam a ser idênticos em qualquer sistema operacional, preservando a garantia de que `pnpm run db:reset` reproduz o banco do zero. Nenhuma regra de negócio foi afetada.
 
 ## Fase 1 — Fundação técnica
 
@@ -56,11 +56,11 @@ Este backlog organiza trabalho, mas **não transforma itens pendentes em requisi
 
 ### P1-02 — Aplicação base e pipeline de qualidade — CONCLUÍDO
 - aplicação base em Next.js 16.3.3 + React + TypeScript;
-- Node.js 24 e npm com lockfile versionado;
+- Node.js 24 e pnpm com lockfile versionado (fluxo atualizado na Issue #22);
 - Tailwind CSS e página inicial mínima, responsiva e acessível;
 - ESLint, typecheck e teste smoke com Vitest/React Testing Library;
 - build de produção validado;
-- GitHub Actions executando `npm ci`, lint, typecheck, teste e build;
+- GitHub Actions executando `pnpm install --frozen-lockfile`, lint, typecheck, teste e build;
 - README de execução local e `AGENTS.md` versionados;
 - nenhuma integração Supabase/Vercel ou regra de negócio antecipada nesta etapa.
 
@@ -100,7 +100,7 @@ Este backlog organiza trabalho, mas **não transforma itens pendentes em requisi
 - logger aplicado somente a falhas técnicas do Auth (recuperação, logout, atualização de senha, exceção no Proxy); fluxos esperados (senha inválida, anônimo em rota protegida, validações) não geram log;
 - `getSupabasePublicConfig()` valida URL http(s), chave presente e recusa em variável pública tanto `sb_secret_` quanto JWT legado de `service_role`, sem ecoar valores;
 - matriz de configuração Local/Preview/Production, distinção público x secreto, política de logs, campos proibidos, investigação de erro e procedimento de incidente de segredo em `docs/operations/environments-observability.md`; valores de Preview/Production marcados como inexistentes;
-- `.env*` reais ignorados (validado com `git check-ignore`), `.env.example` só com placeholders, `npm run check:secrets` (script sem terceiros) executado na CI;
+- `.env*` reais ignorados (validado com `git check-ignore`), `.env.example` só com placeholders, `pnpm run check:secrets` (script sem terceiros) executado na CI;
 - GitHub secret scanning e push protection confirmados ativos via API (0 alertas), com limitações registradas; nenhum recurso pago contratado;
 - testes Vitest para logger, minimização, `onRequestError`, configuração e UI de erro (81 testes no total); 8/8 pgTAP preservados;
 - nenhum ambiente Vercel/Supabase remoto criado; nenhum serviço pago.
@@ -148,13 +148,21 @@ Inclui o **vínculo entre associado e categoria estatutária**, desmembrado da P
 
 **Evidência:** Issue #20 e PR #21; CI validou aplicação e banco local, com reset completo a partir das migrations e 59/59 testes pgTAP aprovados. Nenhum ambiente remoto foi criado ou alterado.
 
-#### Incremento 2 — pendente
+#### Refinamento de autorização — Issue #22
+
+[Especificação técnica e pacote de decisão](../security/admin-authorization-refinement.md): DT-015A define concessão específica por UUID, guard server-side e RLS; **DP-015B permanece pendente** de quem pode receber acesso e quem aprova concessões/revogações. Não houve implementação de autorização ou CRUD.
+
+#### Incremento 2 — fundação mínima de autorização local, a implementar
+
+Em tarefa própria: tabela de concessão, predicado, guard e procedimento operacional com fixtures fictícias e testes negativos. Preservar `members` e `membership_categories` fechadas. Não exige escolher pessoas reais; não encerra DP-015B.
+
+#### Incremento seguinte — cadastro administrativo, pendente
 
 **Bloqueador remanescente:**
 
-- **DP-015** — recorte de autorização: sem modelo de permissão (P2-05), um CRUD de associados só poderia liberar acesso a toda conta autenticada ou a ninguém. Ver `member-model-refinement.md`, §2.
+- **DP-015B** — destinatários e autoridade organizacional de concessão/revogação ainda não definidos. DT-015A está especificada, mas a fundação ainda precisa ser implementada e validada antes do cadastro. Ver [refinamento de autorização](../security/admin-authorization-refinement.md).
 
-Enquanto DP-015 não for decidida, permanecem fora de entrega: CRUD administrativo, telas, listagens, formulários, Server Actions, APIs de associado e qualquer policy RLS permissiva. **A P2-02 não pode ser declarada concluída antes disso.**
+Enquanto DP-015B não for decidida ou a fundação não estiver validada, permanecem fora de entrega: CRUD administrativo, telas, listagens, formulários, Server Actions, APIs de associado e qualquer policy que libere dados de `members` ou do catálogo. **A P2-02 não pode ser declarada concluída antes disso.**
 
 **Delimitação mantida:** a P2-02 não cria coluna de situação cadastral. Estados, transições e histórico do ciclo associativo permanecem na P2-04, que deve preceder qualquer funcionalidade dependente de vínculo vigente.
 
@@ -166,6 +174,8 @@ Implementar estados/transições apenas conforme `membership-model.md` e decisã
 
 ### P2-05 — Perfis e permissões
 Matriz mínima de administração com validação server-side e respeito à competência estatutária da Diretoria para admissão/demissão de sócios.
+
+Mantém a responsabilidade pela matriz futura e eventual gestão de concessões. O recorte técnico mínimo DT-015A será antecipado de forma delimitada para a fundação da P2-02, sem concluir P2-05.
 
 Trata das permissões de **operação administrativa**. O catálogo de categorias estatutárias permanece fora de qualquer perfil de edição cotidiana, conforme a governança definida na P2-01.
 

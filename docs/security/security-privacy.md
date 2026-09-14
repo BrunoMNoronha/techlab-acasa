@@ -20,6 +20,10 @@ Estabelecer requisitos mínimos desde o início, independentemente da stack esco
 - separar permissões administrativas por capacidade relevante;
 - impedir que associado consulte dados de outro associado por manipulação de identificadores.
 
+### Recorte inicial de autorização — DP-015
+
+O [refinamento de autorização administrativa](admin-authorization-refinement.md) é a fonte principal do modelo mínimo, alternativas, bootstrap, revogação, ameaças e testes futuros (Issue #22). DT-015A especifica concessão de manutenção do cadastro por UUID de Auth, guard a cada operação e RLS; **DP-015B permanece pendente** de decisão organizacional. Sem autoatribuição, vínculo com `members`, segredo administrativo na aplicação ou acesso amplo de contas autenticadas. Nenhuma proteção de banco foi alterada neste refinamento. Auditoria de runtime permanece na P2-06; evidência operacional de provisionamento não a substitui.
+
 ## Dados pessoais e LGPD
 
 - coletar somente dados necessários e com finalidade definida;
@@ -72,7 +76,7 @@ A trilha de auditoria não deve permitir alteração ordinária pelo mesmo fluxo
 - logger server-side estruturado com allow-list de campos: nunca recebe request, headers, cookies, claims, usuário, erro completo ou `process.env`; mensagem de erro só em desenvolvimento, stack nunca;
 - `onRequestError` do Next.js encaminha erros do servidor ao logger apenas com template da rota, tipo de rota, método, nome do erro e `digest`;
 - páginas de erro genéricas (`error.tsx`, `global-error.tsx`) sem detalhes técnicos;
-- `.env*` reais ignorados pelo Git, `npm run check:secrets` na CI, GitHub secret scanning e push protection ativos (camada adicional, com limitações documentadas) e procedimento de resposta a vazamento com revogação obrigatória;
+- `.env*` reais ignorados pelo Git, `pnpm run check:secrets` na CI, GitHub secret scanning e push protection ativos (camada adicional, com limitações documentadas) e procedimento de resposta a vazamento com revogação obrigatória;
 - validação de configuração que recusa chave secreta (`sb_secret_` ou JWT legado de `service_role`) em variável `NEXT_PUBLIC_*` e não ecoa valores nas mensagens.
 
 ## Desenvolvimento seguro

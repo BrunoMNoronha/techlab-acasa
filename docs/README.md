@@ -28,6 +28,7 @@ Este diretório é a fonte oficial da documentação do projeto, em conjunto com
 
 ### Segurança e privacidade
 - [`security/security-privacy.md`](security/security-privacy.md) — baseline de segurança, LGPD, acesso e auditoria.
+- [`security/admin-authorization-refinement.md`](security/admin-authorization-refinement.md) — DP-015: mecanismo mínimo de autorização, bootstrap, testes negativos e decisão organizacional pendente.
 
 ### Operação
 - [`operations/environments-observability.md`](operations/environments-observability.md) — ambientes, matriz de configuração, público x secreto, política de logs, captura de erros e resposta a vazamento de segredos.
