@@ -1,8 +1,16 @@
 import "server-only";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { Member, MemberInput, MembershipCategory } from "./types";
-import { isValidUuid } from "./validation";
+import type {
+  Member,
+  MemberInput,
+  MemberListParams,
+  MembershipCategory,
+  PaginatedMembersResult,
+} from "./types";
+import { isValidUuid, sanitizeIlikePattern } from "./validation";
+
+export const DEFAULT_PAGE_SIZE = 25;
 
 /**
  * Consulta a lista de categorias estatutárias diretamente do banco de dados.
@@ -23,21 +31,76 @@ export async function getMembershipCategories(): Promise<MembershipCategory[]> {
 }
 
 /**
- * Consulta a listagem simples de associados cadastrados.
- * Ordenação determinística por nome.
+ * Consulta a listagem paginada de associados com filtros e pesquisa no banco (P2-03).
+ *
+ * Requisitos atendidos:
+ * - RF-003 / RNF-008: busca textual por nome/razão social (`members.name`), filtros
+ *   por `person_type` e `membership_category_code`, e paginação server-side.
+ * - Ordenação determinística: `name ASC`, com desempate por `id ASC`.
+ * - Segurança: parâmetros de ILIKE são sanitizados contra injeção de wildcards;
+ *   filtros são aplicados via API tipada do PostgREST; RLS ativo com sessão do operador.
  */
-export async function listMembers(): Promise<Member[]> {
-  const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("members")
-    .select("id, person_type, name, membership_category_code, email, phone, created_at, updated_at")
-    .order("name", { ascending: true });
+export async function listMembers(
+  params: MemberListParams = {},
+): Promise<PaginatedMembersResult> {
+  const pageSize = DEFAULT_PAGE_SIZE;
+  const page = params.page && params.page >= 1 ? Math.floor(params.page) : 1;
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
 
-  if (error || !data) {
-    return [];
+  const supabase = await createSupabaseServerClient();
+
+  let query = supabase
+    .from("members")
+    .select(
+      "id, person_type, name, membership_category_code, email, phone, created_at, updated_at",
+      { count: "exact" },
+    );
+
+  // 1. Pesquisa textual por nome / razão social
+  if (params.q) {
+    const escaped = sanitizeIlikePattern(params.q);
+    query = query.ilike("name", `%${escaped}%`);
   }
 
-  return data as Member[];
+  // 2. Filtro por tipo de pessoa (PF / PJ)
+  if (params.personType) {
+    query = query.eq("person_type", params.personType);
+  }
+
+  // 3. Filtro por categoria estatutária
+  if (params.category) {
+    query = query.eq("membership_category_code", params.category);
+  }
+
+  // 4. Ordenação determinística e paginação server-side
+  query = query
+    .order("name", { ascending: true })
+    .order("id", { ascending: true })
+    .range(from, to);
+
+  const { data, count, error } = await query;
+
+  if (error || !data) {
+    return {
+      items: [],
+      page,
+      pageSize,
+      totalCount: 0,
+      totalPages: 1,
+    };
+  }
+
+  const totalCount = count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+  return {
+    items: data as Member[],
+    page,
+    pageSize,
+    totalCount,
+    totalPages,
+  };
 }
 
 /**

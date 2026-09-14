@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   isValidEmailFormat,
   isValidUuid,
+  normalizeMemberListParams,
+  sanitizeIlikePattern,
   validateMemberInput,
 } from "./validation";
 
@@ -145,6 +147,86 @@ describe("validation", () => {
       if (!result.success) {
         expect(result.errors.email).toBeDefined();
       }
+    });
+  });
+
+  describe("sanitizeIlikePattern", () => {
+    it("escapa wildcards % e _ e barras invertidas \\", () => {
+      expect(sanitizeIlikePattern("Maria%Silva")).toBe("Maria\\%Silva");
+      expect(sanitizeIlikePattern("Carlos_Alberto")).toBe("Carlos\\_Alberto");
+      expect(sanitizeIlikePattern("Teste\\Busca")).toBe("Teste\\\\Busca");
+      expect(sanitizeIlikePattern("%_\\")).toBe("\\%\\_\\\\");
+    });
+
+    it("preserva caracteres sem wildcard inalterados", () => {
+      expect(sanitizeIlikePattern("Maria da Silva")).toBe("Maria da Silva");
+      expect(sanitizeIlikePattern("TechLab+ ACASA")).toBe("TechLab+ ACASA");
+    });
+  });
+
+  describe("normalizeMemberListParams", () => {
+    it("retorna página 1 padrão para entrada indefinida ou vazia", () => {
+      expect(normalizeMemberListParams(undefined)).toEqual({ page: 1 });
+      expect(normalizeMemberListParams({})).toEqual({ page: 1 });
+    });
+
+    it("normaliza parâmetro q com remoção de espaços e limite de 100 caracteres", () => {
+      expect(normalizeMemberListParams({ q: "  Maria Silva  " })).toEqual({
+        page: 1,
+        q: "Maria Silva",
+      });
+      expect(normalizeMemberListParams({ q: "   " })).toEqual({ page: 1 });
+
+      const longString = "a".repeat(150);
+      const normalized = normalizeMemberListParams({ q: longString });
+      expect(normalized.q?.length).toBe(100);
+    });
+
+    it("normaliza parâmetro personType exclusivamente para PF ou PJ", () => {
+      expect(normalizeMemberListParams({ personType: "pf" })).toEqual({
+        page: 1,
+        personType: "PF",
+      });
+      expect(normalizeMemberListParams({ personType: " PJ " })).toEqual({
+        page: 1,
+        personType: "PJ",
+      });
+      expect(normalizeMemberListParams({ personType: "OUTRO" })).toEqual({ page: 1 });
+      expect(normalizeMemberListParams({ personType: "" })).toEqual({ page: 1 });
+    });
+
+    it("normaliza parâmetro category com aparo de espaços", () => {
+      expect(normalizeMemberListParams({ category: "  CONTRIBUINTE  " })).toEqual({
+        page: 1,
+        category: "CONTRIBUINTE",
+      });
+      expect(normalizeMemberListParams({ category: "   " })).toEqual({ page: 1 });
+    });
+
+    it("normaliza parâmetro page convertendo valores inválidos para 1", () => {
+      expect(normalizeMemberListParams({ page: "3" })).toEqual({ page: 3 });
+      expect(normalizeMemberListParams({ page: 4 })).toEqual({ page: 4 });
+      expect(normalizeMemberListParams({ page: "0" })).toEqual({ page: 1 });
+      expect(normalizeMemberListParams({ page: "-5" })).toEqual({ page: 1 });
+      expect(normalizeMemberListParams({ page: "invalido" })).toEqual({ page: 1 });
+      expect(normalizeMemberListParams({ page: NaN })).toEqual({ page: 1 });
+      expect(normalizeMemberListParams({ page: 2.7 })).toEqual({ page: 2 });
+    });
+
+    it("combina todos os parâmetros normalizados com segurança", () => {
+      const result = normalizeMemberListParams({
+        q: "  Empresa A  ",
+        personType: "pj",
+        category: "FUNDADOR",
+        page: "2",
+      });
+
+      expect(result).toEqual({
+        q: "Empresa A",
+        personType: "PJ",
+        category: "FUNDADOR",
+        page: 2,
+      });
     });
   });
 });

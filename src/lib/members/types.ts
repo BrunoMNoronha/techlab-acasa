@@ -30,3 +30,18 @@ export type MemberFormState = {
   fieldErrors?: Partial<Record<keyof MemberInput, string>>;
   memberId?: string;
 };
+
+export interface MemberListParams {
+  q?: string;
+  personType?: PersonType;
+  category?: string;
+  page?: number;
+}
+
+export interface PaginatedMembersResult {
+  items: Member[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
